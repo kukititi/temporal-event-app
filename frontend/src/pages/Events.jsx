@@ -6,34 +6,34 @@ function Events() {
       title: "Anime Expo 2026",
       category: "Anime",
       location: "Providencia",
-      distance: "2.3 km away",
+      distance: "A 2.3 km de distancia",
     },
 
     {
-      title: "Robotics Meetup",
-      category: "Tech",
+      title: "Meetup de Robótica",
+      category: "Tecnología",
       location: "Santiago Centro",
-      distance: "4.1 km away",
+      distance: "A 4.1 km de distancia",
     },
 
     {
-      title: "League Tournament",
+      title: "Torneo de League of Legends",
       category: "Gaming",
       location: "Las Condes",
-      distance: "6.5 km away",
+      distance: "A 6.5 km de distancia",
     },
   ];
 
-  const filters = ["All", "Gaming", "Music", "Anime", "Tech"];
+  const filters = ["Todos", "Gaming", "Música", "Anime", "Tecnología"];
 
   return (
     <div className="events-container">
       <div className="events-header">
-        <h1>Discover Events</h1>
+        <h1>Descubrir Eventos</h1>
 
         <input
           type="text"
-          placeholder="Search events..."
+          placeholder="Buscar eventos..."
           className="search-bar"
         />
       </div>
@@ -47,11 +47,11 @@ function Events() {
       </div>
 
       <div className="sort-container">
-        <button className="sort-button">📍 Nearby</button>
+        <button className="sort-button">📍 Cercanos</button>
 
-        <button className="sort-button">🔥 Trending</button>
+        <button className="sort-button">🔥 Tendencias</button>
 
-        <button className="sort-button">🕒 Recent</button>
+        <button className="sort-button">🕒 Recientes</button>
       </div>
 
       <div className="events-list">

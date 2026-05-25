@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 import AnimatedMap from "../components/AnimatedMap";
 
-import "../styles/home.css";
+import "../styles/intro.css";
 
 function Home() {
   return (
@@ -11,17 +11,17 @@ function Home() {
         <h1>Descubre Eventos a tu Alrededor</h1>
 
         <p>
-          Explore concerts, meetups, gaming events and community activities
-          happening in real time.
+          Explora conciertos, juntas, eventos gaming y actividades comunitarias
+          ocurriendo en tiempo real cerca de ti.
         </p>
 
         <div className="hero-buttons">
           <Link to="/events">
-            <button>Explore Events</button>
+            <button>Explorar Eventos</button>
           </Link>
 
           <Link to="/register">
-            <button>Create Account</button>
+            <button>Crear Cuenta</button>
           </Link>
         </div>
       </div>
