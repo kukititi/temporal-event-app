@@ -81,3 +81,25 @@
     justify-content: center;
   }
 }
+
+.navbar-logo {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+}
+
+.navbar-logo-image {
+  width: 64px;
+
+  height: 64px;
+
+  object-fit: contain;
+
+  transition: 0.3s;
+}
+
+.navbar-logo-image:hover {
+  transform: scale(1.05);
+}

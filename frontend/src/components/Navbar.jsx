@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import logo from "../assets/tea-logo.png";
 
 import "../styles/navbar.css";
 
@@ -6,7 +7,7 @@ function Navbar() {
   return (
     <nav className="navbar">
       <div className="navbar-logo">
-        <h2>T.E.A.</h2>
+        <img src={logo} alt="TEA Logo" className="navbar-logo-image" />
       </div>
 
       <ul className="navbar-links">
