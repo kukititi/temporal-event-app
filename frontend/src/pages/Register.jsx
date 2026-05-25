@@ -1,8 +1,58 @@
 import { Link } from "react-router-dom";
 
+import { useState } from "react";
+
 import "../styles/auth.css";
 
 function Register() {
+  const [username, setUsername] = useState("");
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [city, setCity] = useState("");
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("http://localhost:3000/users/register", {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          username,
+          email,
+          password,
+          city,
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log(data);
+
+      if (response.ok) {
+        alert("Usuario creado correctamente 🚀");
+
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setCity("");
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.log(error);
+
+      alert("Error creando usuario");
+    }
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -19,14 +69,34 @@ function Register() {
           Únete a la comunidad y descubre eventos cerca de ti.
         </p>
 
-        <form className="auth-form">
-          <input type="text" placeholder="Nombre de usuario" />
+        <form className="auth-form" onSubmit={handleRegister}>
+          <input
+            type="text"
+            placeholder="Nombre de usuario"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
 
-          <input type="email" placeholder="Correo electrónico" />
+          <input
+            type="email"
+            placeholder="Correo electrónico"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
 
-          <input type="password" placeholder="Contraseña" />
+          <input
+            type="password"
+            placeholder="Contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
 
-          <input type="password" placeholder="Confirmar contraseña" />
+          <input
+            type="text"
+            placeholder="Ciudad"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
 
           <button type="submit">Crear Cuenta</button>
         </form>
