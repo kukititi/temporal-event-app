@@ -5,7 +5,23 @@ import "../styles/events.css";
 function Events() {
   const [events, setEvents] = useState([]);
 
+  const [search, setSearch] = useState("");
+
+  const [selectedFilter, setSelectedFilter] = useState("Todos");
+
   const filters = ["Todos", "Gaming", "Música", "Anime", "Tecnología"];
+
+  const filteredEvents = events.filter((event) => {
+    const matchesSearch =
+      event.title.toLowerCase().includes(search.toLowerCase()) ||
+      event.category.toLowerCase().includes(search.toLowerCase()) ||
+      event.location.toLowerCase().includes(search.toLowerCase());
+
+    const matchesFilter =
+      selectedFilter === "Todos" || event.category === selectedFilter;
+
+    return matchesSearch && matchesFilter;
+  });
 
   async function fetchEvents() {
     try {
@@ -38,12 +54,20 @@ function Events() {
           type="text"
           placeholder="Buscar eventos..."
           className="search-bar"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
       <div className="filters-container">
         {filters.map((filter, index) => (
-          <button key={index} className="filter-button">
+          <button
+            key={index}
+            className={`filter-button ${
+              selectedFilter === filter ? "active-filter" : ""
+            }`}
+            onClick={() => setSelectedFilter(filter)}
+          >
             {filter}
           </button>
         ))}
@@ -58,7 +82,7 @@ function Events() {
       </div>
 
       <div className="events-list">
-        {events.map((event) => (
+        {filteredEvents.map((event) => (
           <div key={event.id} className="event-card">
             <div className="event-image"></div>
 
