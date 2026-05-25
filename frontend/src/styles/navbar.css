@@ -87,13 +87,15 @@
 
   align-items: center;
 
+  justify-content: center;
+
   gap: 10px;
 }
 
 .navbar-logo-image {
-  width: 64px;
+  width: 90px;
 
-  height: 64px;
+  height: 90px;
 
   object-fit: contain;
 
