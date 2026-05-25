@@ -142,3 +142,13 @@
 .event-info small {
   color: #9ca3af;
 }
+
+.event-address {
+  color: #9ca3af;
+
+  font-size: 0.9rem;
+
+  margin-top: 8px;
+
+  line-height: 1.4;
+}

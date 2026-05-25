@@ -31,7 +31,11 @@ function Login() {
       console.log(data);
 
       if (response.ok) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+
         alert("Login exitoso 🚀");
+
+        console.log("Usuario guardado:", data.user);
 
         setEmail("");
         setPassword("");

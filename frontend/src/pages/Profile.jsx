@@ -1,6 +1,8 @@
 import "../styles/profile.css";
 
 function Profile() {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const interests = [
     "Gaming",
     "Música",
@@ -25,13 +27,13 @@ function Profile() {
           className="profile-image"
         />
 
-        <h2>@BenjaTea</h2>
+        <h2>@{user?.username || "Usuario"}</h2>
 
-        <h3>Benjamin Manriquez</h3>
+        <h3>{user?.username || "Sin nombre"}</h3>
 
-        <p>benja@email.com</p>
+        <p>{user?.email || "Sin correo"}</p>
 
-        <span>📍 Santiago, Chile</span>
+        <span>📍 {user?.city || "Sin ciudad"}</span>
       </div>
 
       <div className="profile-interests">
