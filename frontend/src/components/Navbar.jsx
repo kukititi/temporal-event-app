@@ -11,23 +11,23 @@ function Navbar() {
 
       <ul className="navbar-links">
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/">Inicio</Link>
         </li>
 
         <li>
-          <Link to="/events">Events</Link>
+          <Link to="/events">Eventos</Link>
         </li>
 
         <li>
-          <Link to="/profile">Profile</Link>
+          <Link to="/profile">Perfil</Link>
         </li>
 
         <li>
-          <Link to="/login">Login</Link>
+          <Link to="/login">Ingresar</Link>
         </li>
 
         <li>
-          <Link to="/register">Register</Link>
+          <Link to="/register">Registro</Link>
         </li>
       </ul>
     </nav>
