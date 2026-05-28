@@ -72,7 +72,6 @@ function Events() {
           </button>
         ))}
       </div>
-
       <div className="sort-container">
         <button className="sort-button">📍 Cercanos</button>
 
