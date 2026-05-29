@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import "../styles/mapHome.css";
+import "../styles/maphome.css";
 import API_URL from "../config/api";
 
 function MapHome() {
