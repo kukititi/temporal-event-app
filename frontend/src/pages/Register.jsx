@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 
 import "../styles/auth.css";
+import API_URL from "../config/api";
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -17,7 +18,7 @@ function Register() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:3000/users/register", {
+      const response = await fetch(`${API_URL}/users/register`, {
         method: "POST",
 
         headers: {

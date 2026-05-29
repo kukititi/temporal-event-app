@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import "../styles/mapHome.css";
+import API_URL from "../config/api";
 
 function MapHome() {
   const [events, setEvents] = useState([]);
@@ -11,7 +12,7 @@ function MapHome() {
 
   async function fetchEvents() {
     try {
-      const response = await fetch("http://localhost:3000/events");
+      const response = await fetch(`${API_URL}/events`);
 
       const data = await response.json();
 
