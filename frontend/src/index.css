@@ -120,3 +120,7 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+.main-content {
+  padding-top: 100px;
+}

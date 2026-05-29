@@ -35,6 +35,6 @@ pool
     console.log("Error PostgreSQL:", err.message);
   });
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
 });
