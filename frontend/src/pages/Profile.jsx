@@ -37,6 +37,10 @@ function Profile() {
 
   const [showCreatedEvents, setShowCreatedEvents] = useState(false);
 
+  const [selectedEventAttendees, setSelectedEventAttendees] = useState([]);
+
+  const [openAttendeesEvent, setOpenAttendeesEvent] = useState(null);
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -224,6 +228,20 @@ function Profile() {
     }
   }
 
+  async function fetchAttendeesForEvent(eventId) {
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}/attendees`);
+
+      const data = await response.json();
+
+      setSelectedEventAttendees(data);
+
+      setOpenAttendeesEvent(eventId);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const interests = [
     "Gaming",
     "Música",
@@ -405,6 +423,24 @@ function Profile() {
                       <small>
                         {new Date(event.event_date).toLocaleDateString()}
                       </small>
+                      <button onClick={() => fetchAttendeesForEvent(event.id)}>
+                        👥 Ver asistentes
+                      </button>
+                      {openAttendeesEvent === event.id && (
+                        <div className="attendees-list">
+                          <h4>Asistentes</h4>
+
+                          {selectedEventAttendees.length === 0 ? (
+                            <p>No hay asistentes todavía.</p>
+                          ) : (
+                            selectedEventAttendees.map((attendee) => (
+                              <div key={attendee.id} className="attendee-item">
+                                👤 {attendee.username}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
 
                       {organizerMode && (
                         <div className="event-actions">

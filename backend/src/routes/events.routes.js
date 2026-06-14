@@ -246,4 +246,33 @@ router.put("/:id", async (req, res) => {
     });
   }
 });
+
+router.get("/:id/attendees", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT
+        users.id,
+        users.username,
+        users.email
+      FROM event_attendees
+      JOIN users
+      ON users.id = event_attendees.user_id
+      WHERE event_attendees.event_id = $1
+      `,
+      [id],
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo asistentes",
+    });
+  }
+});
+
 module.exports = router;
