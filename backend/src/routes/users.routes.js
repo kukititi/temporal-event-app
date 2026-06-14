@@ -142,4 +142,29 @@ router.put("/:id/organizer-mode", async (req, res) => {
   }
 });
 
+router.put("/:id/address", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { address } = req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET address = $1
+      WHERE id = $2
+      RETURNING *
+      `,
+      [address, id],
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error actualizando dirección",
+    });
+  }
+});
+
 module.exports = router;

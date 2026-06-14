@@ -11,6 +11,10 @@ function Profile() {
     user?.organizer_mode || false,
   );
 
+  const [editingAddress, setEditingAddress] = useState(false);
+
+  const [newAddress, setNewAddress] = useState(user?.address || "");
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -52,6 +56,30 @@ function Profile() {
     }
   }
 
+  async function updateAddress() {
+    try {
+      const response = await fetch(`${API_URL}/users/${user.id}/address`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          address: newAddress,
+        }),
+      });
+
+      const updatedUser = await response.json();
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+
+      setEditingAddress(false);
+
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const interests = [
     "Gaming",
     "Música",
@@ -86,7 +114,23 @@ function Profile() {
 
         <span>🌎 {user?.city || "Sin ciudad"}</span>
 
-        <p>📍 {user?.address || "Sin dirección"}</p>
+        {editingAddress ? (
+          <div>
+            <input
+              type="text"
+              value={newAddress}
+              onChange={(e) => setNewAddress(e.target.value)}
+            />
+
+            <button onClick={updateAddress}>Guardar</button>
+          </div>
+        ) : (
+          <div>
+            <p>📍 {user?.address || "Sin dirección"}</p>
+
+            <button onClick={() => setEditingAddress(true)}>Editar</button>
+          </div>
+        )}
       </div>
 
       <div className="profile-interests">
