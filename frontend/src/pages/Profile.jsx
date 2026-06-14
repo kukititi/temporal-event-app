@@ -29,6 +29,8 @@ function Profile() {
 
   const [eventDate, setEventDate] = useState("");
 
+  const [editingEventId, setEditingEventId] = useState(null);
+
   const [myEvents, setMyEvents] = useState([]);
 
   const [showAttendedEvents, setShowAttendedEvents] = useState(false);
@@ -137,6 +139,43 @@ function Profile() {
     }
   }
 
+  async function updateEvent() {
+    try {
+      const response = await fetch(`${API_URL}/events/${editingEventId}`, {
+        method: "PUT",
+
+        headers: {
+          "Content-Type": "application/json",
+        },
+
+        body: JSON.stringify({
+          title: eventTitle,
+          description: eventDescription,
+          category: eventCategory,
+          location: eventLocation,
+          address: eventAddress,
+          event_date: eventDate,
+        }),
+      });
+
+      const updatedEvent = await response.json();
+
+      setMyEvents(
+        myEvents.map((event) =>
+          event.id === updatedEvent.id ? updatedEvent : event,
+        ),
+      );
+
+      setEditingEventId(null);
+
+      setShowCreateEvent(false);
+
+      alert("Evento actualizado 🚀");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async function deleteEvent(eventId) {
     const confirmDelete = window.confirm(
       "¿Seguro que deseas eliminar este evento?",
@@ -155,6 +194,22 @@ function Profile() {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  function editEvent(event) {
+    setEditingEventId(event.id);
+
+    setEventTitle(event.title || "");
+    setEventDescription(event.description || "");
+    setEventCategory(event.category || "");
+    setEventLocation(event.location || "");
+    setEventAddress(event.address || "");
+
+    if (event.event_date) {
+      setEventDate(event.event_date.slice(0, 16));
+    }
+
+    setShowCreateEvent(true);
   }
 
   async function fetchMyEvents() {
@@ -315,7 +370,9 @@ function Profile() {
                 onChange={(e) => setEventDate(e.target.value)}
               />
 
-              <button onClick={createEvent}>Guardar Evento</button>
+              <button onClick={editingEventId ? updateEvent : createEvent}>
+                {editingEventId ? "Guardar Cambios" : "Guardar Evento"}
+              </button>
             </div>
           )}
 
@@ -351,7 +408,9 @@ function Profile() {
 
                       {organizerMode && (
                         <div className="event-actions">
-                          <button>Editar</button>
+                          <button onClick={() => editEvent(event)}>
+                            Editar
+                          </button>
 
                           <button onClick={() => deleteEvent(event.id)}>
                             Eliminar

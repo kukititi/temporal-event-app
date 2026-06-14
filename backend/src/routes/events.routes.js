@@ -214,4 +214,36 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const { title, description, category, location, address, event_date } =
+      req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE events
+      SET
+        title = $1,
+        description = $2,
+        category = $3,
+        location = $4,
+        address = $5,
+        event_date = $6
+      WHERE id = $7
+      RETURNING *
+      `,
+      [title, description, category, location, address, event_date, id],
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error actualizando evento",
+    });
+  }
+});
 module.exports = router;
