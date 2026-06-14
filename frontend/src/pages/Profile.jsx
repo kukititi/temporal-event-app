@@ -84,7 +84,9 @@ function Profile() {
 
         <p>{user?.email || "Sin correo"}</p>
 
-        <span>📍 {user?.city || "Sin ciudad"}</span>
+        <span>🌎 {user?.city || "Sin ciudad"}</span>
+
+        <p>📍 {user?.address || "Sin dirección"}</p>
       </div>
 
       <div className="profile-interests">

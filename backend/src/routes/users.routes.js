@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
-    const { username, email, password, city } = req.body;
+    const { username, email, password, city, address } = req.body;
 
     const result = await pool.query(
       `

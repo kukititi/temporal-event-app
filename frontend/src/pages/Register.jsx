@@ -12,6 +12,8 @@ function Register() {
 
   const [password, setPassword] = useState("");
 
+  const [address, setAddress] = useState("");
+
   const [city, setCity] = useState("");
 
   const handleRegister = async (e) => {
@@ -30,6 +32,7 @@ function Register() {
           email,
           password,
           city,
+          address,
         }),
       });
 
@@ -44,6 +47,7 @@ function Register() {
         setEmail("");
         setPassword("");
         setCity("");
+        setAddress("");
       } else {
         alert(data.message);
       }
@@ -97,6 +101,13 @@ function Register() {
             placeholder="Ciudad"
             value={city}
             onChange={(e) => setCity(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Dirección"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
           />
 
           <button type="submit">Crear Cuenta</button>
