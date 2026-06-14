@@ -14,6 +14,8 @@ function Events() {
 
   const [attendingEvents, setAttendingEvents] = useState({});
 
+  const [favoriteEvents, setFavoriteEvents] = useState({});
+
   const filters = ["Todos", "Gaming", "Música", "Anime", "Tecnología"];
 
   const filteredEvents = events.filter((event) => {
@@ -41,6 +43,7 @@ function Events() {
       data.forEach((event) => {
         fetchAttendees(event.id);
         checkAttendance(event.id);
+        checkFavorite(event.id);
       });
     } catch (error) {
       console.log(error);
@@ -79,6 +82,27 @@ function Events() {
       setAttendingEvents((prev) => ({
         ...prev,
         [eventId]: data.attending,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function checkFavorite(eventId) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user) return;
+
+      const response = await fetch(
+        `${API_URL}/events/${eventId}/is-favorite/${user.id}`,
+      );
+
+      const data = await response.json();
+
+      setFavoriteEvents((prev) => ({
+        ...prev,
+        [eventId]: data.favorite,
       }));
     } catch (error) {
       console.log(error);
@@ -136,6 +160,43 @@ function Events() {
       setAttendingEvents((prev) => ({
         ...prev,
         [eventId]: false,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function toggleFavorite(eventId) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user) return;
+
+      if (favoriteEvents[eventId]) {
+        await fetch(`${API_URL}/events/${eventId}/favorite`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+          }),
+        });
+      } else {
+        await fetch(`${API_URL}/events/${eventId}/favorite`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user_id: user.id,
+          }),
+        });
+      }
+
+      setFavoriteEvents((prev) => ({
+        ...prev,
+        [eventId]: !prev[eventId],
       }));
     } catch (error) {
       console.log(error);
@@ -204,6 +265,13 @@ function Events() {
               <p className="attendees-count">
                 👥 {attendees[event.id] || 0} asistentes
               </p>
+
+              <button
+                className="favorite-button"
+                onClick={() => toggleFavorite(event.id)}
+              >
+                {favoriteEvents[event.id] ? "💖 Guardado" : "🤍 Guardar"}
+              </button>
 
               {attendingEvents[event.id] ? (
                 <button

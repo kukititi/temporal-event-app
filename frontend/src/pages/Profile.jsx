@@ -372,8 +372,7 @@ function Profile() {
               {stats.mostPopularEvent && (
                 <p>
                   Evento más popular: {stats.mostPopularEvent.title} (
-                  {stats.mostPopularEvent.attendees}
-                  asistentes)
+                  {stats.mostPopularEvent.attendees} asistentes)
                 </p>
               )}
             </div>

@@ -328,4 +328,86 @@ router.get("/stats/:userId", async (req, res) => {
     });
   }
 });
+
+router.post("/:id/favorite", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id } = req.body;
+
+    await pool.query(
+      `
+      INSERT INTO favorites (
+        user_id,
+        event_id
+      )
+      VALUES ($1, $2)
+      ON CONFLICT DO NOTHING
+      `,
+      [user_id, id],
+    );
+
+    res.json({
+      message: "Favorito agregado",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error agregando favorito",
+    });
+  }
+});
+
+router.delete("/:id/favorite", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id } = req.body;
+
+    await pool.query(
+      `
+      DELETE FROM favorites
+      WHERE user_id = $1
+      AND event_id = $2
+      `,
+      [user_id, id],
+    );
+
+    res.json({
+      message: "Favorito eliminado",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error eliminando favorito",
+    });
+  }
+});
+
+router.get("/:id/is-favorite/:userId", async (req, res) => {
+  try {
+    const { id, userId } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM favorites
+      WHERE event_id = $1
+      AND user_id = $2
+      `,
+      [id, userId],
+    );
+
+    res.json({
+      favorite: result.rows.length > 0,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error verificando favorito",
+    });
+  }
+});
+
 module.exports = router;
