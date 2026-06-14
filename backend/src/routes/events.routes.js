@@ -158,4 +158,28 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/creator/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT *
+      FROM events
+      WHERE created_by = $1
+      ORDER BY created_at DESC
+      `,
+      [id],
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo eventos del organizador",
+    });
+  }
+});
+
 module.exports = router;

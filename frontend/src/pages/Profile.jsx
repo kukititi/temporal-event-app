@@ -29,6 +29,10 @@ function Profile() {
 
   const [eventDate, setEventDate] = useState("");
 
+  const [myEvents, setMyEvents] = useState([]);
+
+  const [showMyEvents, setShowMyEvents] = useState(false);
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -126,6 +130,18 @@ function Profile() {
       setEventDate("");
 
       setShowCreateEvent(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchMyEvents() {
+    try {
+      const response = await fetch(`${API_URL}/events/creator/${user.id}`);
+
+      const data = await response.json();
+
+      setMyEvents(data);
     } catch (error) {
       console.log(error);
     }
@@ -272,7 +288,36 @@ function Profile() {
             Crear Evento
           </button>
 
-          <button>Mis Eventos</button>
+          {showMyEvents && (
+            <div className="my-events-section">
+              <h2>Mis Eventos</h2>
+
+              {myEvents.length === 0 ? (
+                <p>No has creado eventos todavía.</p>
+              ) : (
+                myEvents.map((event) => (
+                  <div key={event.id} className="event-card">
+                    <h3>{event.title}</h3>
+
+                    <p>{event.category}</p>
+
+                    <p>{event.address}</p>
+
+                    <small>{event.event_date}</small>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          <button
+            onClick={async () => {
+              await fetchMyEvents();
+              setShowMyEvents(!showMyEvents);
+            }}
+          >
+            Mis Eventos
+          </button>
         </div>
       )}
     </div>
