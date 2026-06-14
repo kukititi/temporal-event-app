@@ -31,7 +31,9 @@ function Profile() {
 
   const [myEvents, setMyEvents] = useState([]);
 
-  const [showMyEvents, setShowMyEvents] = useState(false);
+  const [showAttendedEvents, setShowAttendedEvents] = useState(false);
+
+  const [showCreatedEvents, setShowCreatedEvents] = useState(false);
 
   async function fetchAttendedEvents() {
     try {
@@ -157,11 +159,12 @@ function Profile() {
   ];
 
   useEffect(() => {
-    const loadAttendedEvents = async () => {
+    const loadData = async () => {
       await fetchAttendedEvents();
+      await fetchMyEvents();
     };
 
-    loadAttendedEvents();
+    loadData();
   }, []);
 
   return (
@@ -213,19 +216,31 @@ function Profile() {
       </div>
 
       <div className="profile-events">
-        <h2>Eventos Asistidos</h2>
+        <button
+          className="accordion-button"
+          onClick={() => setShowAttendedEvents(!showAttendedEvents)}
+        >
+          {showAttendedEvents ? "▼" : "▶"} Eventos Asistidos (
+          {attendedEvents.length})
+        </button>
 
-        <div className="events-container">
-          {attendedEvents.map((event) => (
-            <div key={event.id} className="event-card">
-              <h3>{event.title}</h3>
+        {showAttendedEvents && (
+          <div className="events-container">
+            {attendedEvents.length === 0 ? (
+              <p>No has asistido a eventos.</p>
+            ) : (
+              attendedEvents.map((event) => (
+                <div key={event.id} className="event-card">
+                  <h3>{event.title}</h3>
 
-              <p>{event.category}</p>
+                  <p>{event.category}</p>
 
-              <small>📍 {event.location}</small>
-            </div>
-          ))}
-        </div>
+                  <small>📍 {event.location}</small>
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
       <div className="profile-organizer">
         <h2>Modo Organizador</h2>
@@ -288,36 +303,45 @@ function Profile() {
             Crear Evento
           </button>
 
-          {showMyEvents && (
-            <div className="my-events-section">
-              <h2>Mis Eventos</h2>
+          <div className="my-events-section">
+            <button
+              className="accordion-button"
+              onClick={() => setShowCreatedEvents(!showCreatedEvents)}
+            >
+              {showCreatedEvents ? "▼" : "▶"} Eventos Creados ({myEvents.length}
+              )
+            </button>
 
-              {myEvents.length === 0 ? (
-                <p>No has creado eventos todavía.</p>
-              ) : (
-                myEvents.map((event) => (
-                  <div key={event.id} className="event-card">
-                    <h3>{event.title}</h3>
+            {showCreatedEvents && (
+              <>
+                {myEvents.length === 0 ? (
+                  <p>No has creado eventos.</p>
+                ) : (
+                  myEvents.map((event) => (
+                    <div key={event.id} className="event-card">
+                      <h3>{event.title}</h3>
 
-                    <p>{event.category}</p>
+                      <p>{event.category}</p>
 
-                    <p>{event.address}</p>
+                      <p>📍 {event.address}</p>
 
-                    <small>{event.event_date}</small>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
+                      <small>
+                        {new Date(event.event_date).toLocaleDateString()}
+                      </small>
 
-          <button
-            onClick={async () => {
-              await fetchMyEvents();
-              setShowMyEvents(!showMyEvents);
-            }}
-          >
-            Mis Eventos
-          </button>
+                      {organizerMode && (
+                        <div className="event-actions">
+                          <button>Editar</button>
+
+                          <button>Eliminar</button>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </>
+            )}
+          </div>
         </div>
       )}
     </div>
