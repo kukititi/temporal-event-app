@@ -10,6 +10,8 @@ function Events() {
 
   const [selectedFilter, setSelectedFilter] = useState("Todos");
 
+  const [attendees, setAttendees] = useState({});
+
   const filters = ["Todos", "Gaming", "Música", "Anime", "Tecnología"];
 
   const filteredEvents = events.filter((event) => {
@@ -33,6 +35,52 @@ function Events() {
       console.log(data);
 
       setEvents(data);
+
+      data.forEach((event) => {
+        fetchAttendees(event.id);
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchAttendees(eventId) {
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}/attendees`);
+
+      const data = await response.json();
+
+      setAttendees((prev) => ({
+        ...prev,
+        [eventId]: data.attendees,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function attendEvent(eventId) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user) {
+        alert("Debes iniciar sesión");
+        return;
+      }
+
+      await fetch(`${API_URL}/events/${eventId}/attend`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+        }),
+      });
+
+      fetchAttendees(eventId);
+
+      alert("Asistencia registrada");
     } catch (error) {
       console.log(error);
     }
@@ -96,6 +144,17 @@ function Events() {
               <div className="event-address">📍 {event.address}</div>
 
               <small>{event.distance}</small>
+
+              <p className="attendees-count">
+                👥 {attendees[event.id] || 0} asistentes
+              </p>
+
+              <button
+                className="attend-button"
+                onClick={() => attendEvent(event.id)}
+              >
+                Asistiré
+              </button>
             </div>
           </div>
         ))}
