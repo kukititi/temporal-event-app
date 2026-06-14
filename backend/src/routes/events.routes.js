@@ -119,4 +119,43 @@ router.get("/:id/is-attending/:userId", async (req, res) => {
   }
 });
 
+router.post("/", async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      category,
+      location,
+      address,
+      event_date,
+      created_by,
+    } = req.body;
+
+    const result = await pool.query(
+      `
+      INSERT INTO events (
+        title,
+        description,
+        category,
+        location,
+        address,
+        event_date,
+        created_by
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      RETURNING *
+      `,
+      [title, description, category, location, address, event_date, created_by],
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error creando evento",
+    });
+  }
+});
+
 module.exports = router;

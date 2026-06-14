@@ -15,6 +15,20 @@ function Profile() {
 
   const [newAddress, setNewAddress] = useState(user?.address || "");
 
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
+
+  const [eventTitle, setEventTitle] = useState("");
+
+  const [eventDescription, setEventDescription] = useState("");
+
+  const [eventCategory, setEventCategory] = useState("");
+
+  const [eventLocation, setEventLocation] = useState("");
+
+  const [eventAddress, setEventAddress] = useState("");
+
+  const [eventDate, setEventDate] = useState("");
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -74,7 +88,44 @@ function Profile() {
 
       setEditingAddress(false);
 
-      window.location.reload();
+      alert("Dirección actualizada");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function createEvent() {
+    try {
+      const response = await fetch(`${API_URL}/events`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: eventTitle,
+          description: eventDescription,
+          category: eventCategory,
+          location: eventLocation,
+          address: eventAddress,
+          event_date: eventDate,
+          created_by: user.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      console.log(data);
+
+      alert("Evento creado 🚀");
+
+      setEventTitle("");
+      setEventDescription("");
+      setEventCategory("");
+      setEventLocation("");
+      setEventAddress("");
+      setEventDate("");
+
+      setShowCreateEvent(false);
     } catch (error) {
       console.log(error);
     }
@@ -171,7 +222,55 @@ function Profile() {
         <div className="organizer-panel">
           <h2>Panel de Organizador</h2>
 
-          <button>Crear Evento</button>
+          {showCreateEvent && (
+            <div className="create-event-form">
+              <input
+                type="text"
+                placeholder="Título"
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+              />
+
+              <textarea
+                placeholder="Descripción"
+                value={eventDescription}
+                onChange={(e) => setEventDescription(e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Categoría"
+                value={eventCategory}
+                onChange={(e) => setEventCategory(e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Ubicación"
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
+              />
+
+              <input
+                type="text"
+                placeholder="Dirección"
+                value={eventAddress}
+                onChange={(e) => setEventAddress(e.target.value)}
+              />
+
+              <input
+                type="datetime-local"
+                value={eventDate}
+                onChange={(e) => setEventDate(e.target.value)}
+              />
+
+              <button onClick={createEvent}>Guardar Evento</button>
+            </div>
+          )}
+
+          <button onClick={() => setShowCreateEvent(!showCreateEvent)}>
+            Crear Evento
+          </button>
 
           <button>Mis Eventos</button>
         </div>
