@@ -28,14 +28,15 @@ router.post("/register", async (req, res) => {
         username,
         email,
         password,
-        city
+        city,
+        address
       )
 
-      VALUES ($1, $2, $3, $4)
+      VALUES ($1, $2, $3, $4, $5)
 
       RETURNING *;
       `,
-      [username, email, password, city],
+      [username, email, password, city, address],
     );
 
     res.status(201).json({
