@@ -167,4 +167,30 @@ router.put("/:id/address", async (req, res) => {
   }
 });
 
+router.get("/:id/favorites", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT e.*
+      FROM events e
+      JOIN favorites f
+      ON e.id = f.event_id
+      WHERE f.user_id = $1
+      ORDER BY e.created_at DESC
+      `,
+      [id],
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo favoritos",
+    });
+  }
+});
+
 module.exports = router;

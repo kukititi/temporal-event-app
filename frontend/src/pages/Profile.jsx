@@ -43,6 +43,10 @@ function Profile() {
 
   const [stats, setStats] = useState(null);
 
+  const [favoriteEvents, setFavoriteEvents] = useState([]);
+
+  const [showFavorites, setShowFavorites] = useState(false);
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -256,6 +260,18 @@ function Profile() {
     }
   }
 
+  async function fetchFavorites() {
+    try {
+      const response = await fetch(`${API_URL}/users/${user.id}/favorites`);
+
+      const data = await response.json();
+
+      setFavoriteEvents(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const interests = [
     "Gaming",
     "Música",
@@ -270,6 +286,7 @@ function Profile() {
       await fetchAttendedEvents();
       await fetchMyEvents();
       await fetchStats();
+      await fetchFavorites();
     };
 
     loadData();
@@ -338,6 +355,32 @@ function Profile() {
               <p>No has asistido a eventos.</p>
             ) : (
               attendedEvents.map((event) => (
+                <div key={event.id} className="event-card">
+                  <h3>{event.title}</h3>
+
+                  <p>{event.category}</p>
+
+                  <small>📍 {event.location}</small>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </div>
+      <div className="profile-favorites">
+        <button
+          className="accordion-button"
+          onClick={() => setShowFavorites(!showFavorites)}
+        >
+          {showFavorites ? "▼" : "▶"} Favoritos ({favoriteEvents.length})
+        </button>
+
+        {showFavorites && (
+          <div className="events-container">
+            {favoriteEvents.length === 0 ? (
+              <p>No tienes favoritos.</p>
+            ) : (
+              favoriteEvents.map((event) => (
                 <div key={event.id} className="event-card">
                   <h3>{event.title}</h3>
 
