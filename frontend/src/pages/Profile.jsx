@@ -41,6 +41,8 @@ function Profile() {
 
   const [openAttendeesEvent, setOpenAttendeesEvent] = useState(null);
 
+  const [stats, setStats] = useState(null);
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -228,6 +230,18 @@ function Profile() {
     }
   }
 
+  async function fetchStats() {
+    try {
+      const response = await fetch(`${API_URL}/events/stats/${user.id}`);
+
+      const data = await response.json();
+
+      setStats(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async function fetchAttendeesForEvent(eventId) {
     try {
       const response = await fetch(`${API_URL}/events/${eventId}/attendees`);
@@ -255,6 +269,7 @@ function Profile() {
     const loadData = async () => {
       await fetchAttendedEvents();
       await fetchMyEvents();
+      await fetchStats();
     };
 
     loadData();
@@ -345,6 +360,24 @@ function Profile() {
       {organizerMode && (
         <div className="organizer-panel">
           <h2>Panel de Organizador</h2>
+
+          {stats && (
+            <div className="stats-card">
+              <h3>📊 Estadísticas</h3>
+
+              <p>Eventos creados: {stats.totalEvents}</p>
+
+              <p>Asistentes totales: {stats.totalAttendees}</p>
+
+              {stats.mostPopularEvent && (
+                <p>
+                  Evento más popular: {stats.mostPopularEvent.title} (
+                  {stats.mostPopularEvent.attendees}
+                  asistentes)
+                </p>
+              )}
+            </div>
+          )}
 
           {showCreateEvent && (
             <div className="create-event-form">

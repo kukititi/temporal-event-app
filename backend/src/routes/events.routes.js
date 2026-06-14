@@ -275,4 +275,57 @@ router.get("/:id/attendees", async (req, res) => {
   }
 });
 
+router.get("/stats/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const eventsResult = await pool.query(
+      `
+      SELECT COUNT(*) AS total_events
+      FROM events
+      WHERE created_by = $1
+      `,
+      [userId],
+    );
+
+    const attendeesResult = await pool.query(
+      `
+      SELECT COUNT(*) AS total_attendees
+      FROM event_attendees ea
+      JOIN events e
+      ON e.id = ea.event_id
+      WHERE e.created_by = $1
+      `,
+      [userId],
+    );
+
+    const popularEventResult = await pool.query(
+      `
+      SELECT
+        e.title,
+        COUNT(ea.user_id) AS attendees
+      FROM events e
+      LEFT JOIN event_attendees ea
+      ON e.id = ea.event_id
+      WHERE e.created_by = $1
+      GROUP BY e.id, e.title
+      ORDER BY attendees DESC
+      LIMIT 1
+      `,
+      [userId],
+    );
+
+    res.json({
+      totalEvents: eventsResult.rows[0].total_events,
+      totalAttendees: attendeesResult.rows[0].total_attendees,
+      mostPopularEvent: popularEventResult.rows[0] || null,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo estadísticas",
+    });
+  }
+});
 module.exports = router;
