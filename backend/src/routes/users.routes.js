@@ -90,4 +90,30 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.get("/:id/attended-events", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT e.*
+      FROM events e
+      JOIN event_attendees ea
+      ON e.id = ea.event_id
+      WHERE ea.user_id = $1
+      ORDER BY ea.attended_at DESC
+      `,
+      [id],
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo eventos asistidos",
+    });
+  }
+});
+
 module.exports = router;

@@ -1,7 +1,27 @@
+import { useEffect, useState } from "react";
 import "../styles/profile.css";
+import API_URL from "../config/api";
 
 function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const [attendedEvents, setAttendedEvents] = useState([]);
+
+  async function fetchAttendedEvents() {
+    try {
+      if (!user) return;
+
+      const response = await fetch(
+        `${API_URL}/users/${user.id}/attended-events`,
+      );
+
+      const data = await response.json();
+
+      setAttendedEvents(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const interests = [
     "Gaming",
@@ -12,11 +32,13 @@ function Profile() {
     "Películas",
   ];
 
-  const attendedEvents = [
-    "Torneo de League of Legends",
-    "Anime Expo 2026",
-    "Meetup de Robótica",
-  ];
+  useEffect(() => {
+    const loadAttendedEvents = async () => {
+      await fetchAttendedEvents();
+    };
+
+    loadAttendedEvents();
+  }, []);
 
   return (
     <div className="profile-container">
@@ -52,9 +74,13 @@ function Profile() {
         <h2>Eventos Asistidos</h2>
 
         <div className="events-container">
-          {attendedEvents.map((event, index) => (
-            <div key={index} className="event-card">
-              {event}
+          {attendedEvents.map((event) => (
+            <div key={event.id} className="event-card">
+              <h3>{event.title}</h3>
+
+              <p>{event.category}</p>
+
+              <small>📍 {event.location}</small>
             </div>
           ))}
         </div>
