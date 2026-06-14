@@ -49,7 +49,9 @@ function Events() {
 
   async function fetchAttendees(eventId) {
     try {
-      const response = await fetch(`${API_URL}/events/${eventId}/attendees`);
+      const response = await fetch(
+        `${API_URL}/events/${eventId}/attendees-count`,
+      );
 
       const data = await response.json();
 

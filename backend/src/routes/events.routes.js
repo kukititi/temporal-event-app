@@ -44,7 +44,7 @@ router.post("/:id/attend", async (req, res) => {
   }
 });
 
-router.get("/:id/attendees", async (req, res) => {
+router.get("/:id/attendees-count", async (req, res) => {
   try {
     const { id } = req.params;
 
