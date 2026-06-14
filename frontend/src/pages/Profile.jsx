@@ -137,6 +137,26 @@ function Profile() {
     }
   }
 
+  async function deleteEvent(eventId) {
+    const confirmDelete = window.confirm(
+      "¿Seguro que deseas eliminar este evento?",
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      await fetch(`${API_URL}/events/${eventId}`, {
+        method: "DELETE",
+      });
+
+      setMyEvents(myEvents.filter((event) => event.id !== eventId));
+
+      alert("Evento eliminado");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async function fetchMyEvents() {
     try {
       const response = await fetch(`${API_URL}/events/creator/${user.id}`);
@@ -333,7 +353,9 @@ function Profile() {
                         <div className="event-actions">
                           <button>Editar</button>
 
-                          <button>Eliminar</button>
+                          <button onClick={() => deleteEvent(event.id)}>
+                            Eliminar
+                          </button>
                         </div>
                       )}
                     </div>

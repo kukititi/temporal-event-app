@@ -182,4 +182,36 @@ router.get("/creator/:id", async (req, res) => {
   }
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      `
+      DELETE FROM event_attendees
+      WHERE event_id = $1
+      `,
+      [id],
+    );
+
+    await pool.query(
+      `
+      DELETE FROM events
+      WHERE id = $1
+      `,
+      [id],
+    );
+
+    res.json({
+      message: "Evento eliminado correctamente",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error eliminando evento",
+    });
+  }
+});
+
 module.exports = router;
