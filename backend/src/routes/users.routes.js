@@ -116,4 +116,29 @@ router.get("/:id/attended-events", async (req, res) => {
   }
 });
 
+router.put("/:id/organizer-mode", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { organizer_mode } = req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET organizer_mode = $1
+      WHERE id = $2
+      RETURNING *
+      `,
+      [organizer_mode, id],
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error actualizando modo organizador",
+    });
+  }
+});
+
 module.exports = router;

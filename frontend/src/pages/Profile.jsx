@@ -7,6 +7,10 @@ function Profile() {
 
   const [attendedEvents, setAttendedEvents] = useState([]);
 
+  const [organizerMode, setOrganizerMode] = useState(
+    user?.organizer_mode || false,
+  );
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -18,6 +22,31 @@ function Profile() {
       const data = await response.json();
 
       setAttendedEvents(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function toggleOrganizerMode() {
+    try {
+      const response = await fetch(
+        `${API_URL}/users/${user.id}/organizer-mode`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            organizer_mode: !organizerMode,
+          }),
+        },
+      );
+
+      const updatedUser = await response.json();
+
+      setOrganizerMode(updatedUser.organizer_mode);
+
+      localStorage.setItem("user", JSON.stringify(updatedUser));
     } catch (error) {
       console.log(error);
     }
@@ -85,6 +114,22 @@ function Profile() {
           ))}
         </div>
       </div>
+      <div className="profile-organizer">
+        <h2>Modo Organizador</h2>
+
+        <button className="organizer-button" onClick={toggleOrganizerMode}>
+          {organizerMode ? "✓ Organizador Activo" : "Activar Modo Organizador"}
+        </button>
+      </div>
+      {organizerMode && (
+        <div className="organizer-panel">
+          <h2>Panel de Organizador</h2>
+
+          <button>Crear Evento</button>
+
+          <button>Mis Eventos</button>
+        </div>
+      )}
     </div>
   );
 }
