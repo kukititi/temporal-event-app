@@ -12,6 +12,8 @@ function Events() {
 
   const [attendees, setAttendees] = useState({});
 
+  const [attendingEvents, setAttendingEvents] = useState({});
+
   const filters = ["Todos", "Gaming", "Música", "Anime", "Tecnología"];
 
   const filteredEvents = events.filter((event) => {
@@ -38,6 +40,7 @@ function Events() {
 
       data.forEach((event) => {
         fetchAttendees(event.id);
+        checkAttendance(event.id);
       });
     } catch (error) {
       console.log(error);
@@ -53,6 +56,27 @@ function Events() {
       setAttendees((prev) => ({
         ...prev,
         [eventId]: data.attendees,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function checkAttendance(eventId) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user) return;
+
+      const response = await fetch(
+        `${API_URL}/events/${eventId}/is-attending/${user.id}`,
+      );
+
+      const data = await response.json();
+
+      setAttendingEvents((prev) => ({
+        ...prev,
+        [eventId]: data.attending,
       }));
     } catch (error) {
       console.log(error);
@@ -80,7 +104,37 @@ function Events() {
 
       fetchAttendees(eventId);
 
+      setAttendingEvents((prev) => ({
+        ...prev,
+        [eventId]: true,
+      }));
+
       alert("Asistencia registrada");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function cancelAttendance(eventId) {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      await fetch(`${API_URL}/events/${eventId}/attend`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+        }),
+      });
+
+      fetchAttendees(eventId);
+
+      setAttendingEvents((prev) => ({
+        ...prev,
+        [eventId]: false,
+      }));
     } catch (error) {
       console.log(error);
     }
@@ -149,12 +203,21 @@ function Events() {
                 👥 {attendees[event.id] || 0} asistentes
               </p>
 
-              <button
-                className="attend-button"
-                onClick={() => attendEvent(event.id)}
-              >
-                Asistiré
-              </button>
+              {attendingEvents[event.id] ? (
+                <button
+                  className="attend-button attending"
+                  onClick={() => cancelAttendance(event.id)}
+                >
+                  ✓ Asistirás
+                </button>
+              ) : (
+                <button
+                  className="attend-button"
+                  onClick={() => attendEvent(event.id)}
+                >
+                  Asistiré
+                </button>
+              )}
             </div>
           </div>
         ))}
