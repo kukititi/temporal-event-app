@@ -350,7 +350,7 @@ function Profile() {
         </button>
 
         {showAttendedEvents && (
-          <div className="events-container">
+          <div className="profile-events-container">
             {attendedEvents.length === 0 ? (
               <p>No has asistido a eventos.</p>
             ) : (
@@ -376,7 +376,7 @@ function Profile() {
         </button>
 
         {showFavorites && (
-          <div className="events-container">
+          <div className="profile-events-container">
             {favoriteEvents.length === 0 ? (
               <p>No tienes favoritos.</p>
             ) : (

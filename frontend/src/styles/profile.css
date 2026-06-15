@@ -91,13 +91,6 @@
   font-weight: bold;
 }
 
-.events-container {
-  display: flex;
-  flex-direction: column;
-
-  gap: 15px;
-}
-
 .event-card {
   padding: 18px;
 
@@ -244,4 +237,11 @@
 .attendees-button {
   background: #059669;
   color: white;
+}
+
+.profile-events-container {
+  display: flex;
+  flex-direction: column;
+
+  gap: 15px;
 }
