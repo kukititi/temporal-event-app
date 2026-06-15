@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import logo from "../assets/tea-logo.png";
+import { useState, useEffect } from "react";
 
 import "../styles/navbar.css";
 
@@ -11,6 +12,23 @@ function logout() {
 
 function Navbar() {
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+
+  function toggleTheme() {
+    const newTheme = theme === "dark" ? "light" : "dark";
+
+    setTheme(newTheme);
+
+    localStorage.setItem("theme", newTheme);
+
+    document.body.className = newTheme;
+  }
+
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-logo">
@@ -46,6 +64,11 @@ function Navbar() {
             </li>
           </>
         )}
+        <li>
+          <button className="theme-button" onClick={toggleTheme}>
+            {theme === "dark" ? "☀️ Claro" : "🌙 Oscuro"}
+          </button>
+        </li>
       </ul>
     </nav>
   );

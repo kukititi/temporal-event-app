@@ -124,3 +124,15 @@ code {
 .main-content {
   padding-top: 100px;
 }
+
+body.dark {
+  background: #06131f;
+
+  color: white;
+}
+
+body.light {
+  background: #f4f7fb;
+
+  color: #1f2937;
+}
