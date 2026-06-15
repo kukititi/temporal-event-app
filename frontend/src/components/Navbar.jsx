@@ -34,17 +34,22 @@ function Navbar() {
 
         {user ? (
           <>
-            <span className="navbar-user">👤 {user.username}</span>
+            <li className="navbar-user">👤 {user.username}</li>
 
-            <button className="logout-button" onClick={logout}>
-              Cerrar Sesión
-            </button>
+            <li>
+              <button className="logout-button" onClick={logout}>
+                Cerrar Sesión
+              </button>
+            </li>
           </>
         ) : (
           <>
-            <Link to="/login">Ingresar</Link>
-
-            <Link to="/register">Registro</Link>
+            <li>
+              <Link to="/login">Ingresar</Link>
+            </li>
+            <li>
+              <Link to="/register">Registro</Link>
+            </li>
           </>
         )}
       </ul>
