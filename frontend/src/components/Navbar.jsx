@@ -3,8 +3,6 @@ import logo from "../assets/tea-logo.png";
 
 import "../styles/navbar.css";
 
-const user = JSON.parse(localStorage.getItem("user"));
-
 function logout() {
   localStorage.removeItem("user");
 
@@ -12,6 +10,7 @@ function logout() {
 }
 
 function Navbar() {
+  const user = JSON.parse(localStorage.getItem("user"));
   return (
     <nav className="navbar">
       <div className="navbar-logo">
@@ -27,9 +26,11 @@ function Navbar() {
           <Link to="/events">Eventos</Link>
         </li>
 
-        <li>
-          <Link to="/profile">Perfil</Link>
-        </li>
+        {user && (
+          <li>
+            <Link to="/profile">👤 Perfil</Link>
+          </li>
+        )}
 
         {user ? (
           <>

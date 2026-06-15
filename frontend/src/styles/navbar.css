@@ -107,15 +107,15 @@
 }
 
 .logout-button {
-  padding: 8px 14px;
-
-  border: none;
-
-  border-radius: 8px;
-
   background: #dc2626;
 
   color: white;
+
+  border: none;
+
+  padding: 8px 14px;
+
+  border-radius: 8px;
 
   cursor: pointer;
 
@@ -124,4 +124,13 @@
 
 .logout-button:hover {
   background: #b91c1c;
+}
+
+.navbar-user {
+  color: #49c5cd;
+
+  font-weight: bold;
+
+  display: flex;
+  align-items: center;
 }
