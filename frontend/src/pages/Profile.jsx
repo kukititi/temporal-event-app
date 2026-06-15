@@ -320,13 +320,15 @@ function Profile() {
             <button className="save-button" onClick={updateAddress}></button>
           </div>
         ) : (
-          <div>
+          <div className="address-container">
             <p>📍 {user?.address || "Sin dirección"}</p>
 
             <button
-              className="edit-button"
+              className="address-edit-button"
               onClick={() => setEditingAddress(true)}
-            ></button>
+            >
+              ✏️ Editar
+            </button>
           </div>
         )}
       </div>
