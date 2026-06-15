@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import { useState } from "react";
 
@@ -6,8 +6,6 @@ import "../styles/auth.css";
 import API_URL from "../config/api";
 
 function Login() {
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -38,7 +36,7 @@ function Login() {
 
         console.log("Usuario guardado:", data.user);
 
-        navigate("/profile");
+        window.location.href = "/profile";
       } else {
         alert(data.message);
       }
