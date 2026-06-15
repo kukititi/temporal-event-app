@@ -96,6 +96,14 @@
   gap: 10px;
 }
 
+.navbar-logo-image {
+  width: 48px;
+  height: 48px;
+}
+
+.navbar-logo-image:hover {
+  transform: scale(1.1);
+}
 .logout-button {
   background: #dc2626;
 
@@ -136,8 +144,4 @@
 
 .navbar-logo {
   text-decoration: none;
-}
-
-.navbar-logo-image:hover {
-  transform: scale(1.1);
 }
