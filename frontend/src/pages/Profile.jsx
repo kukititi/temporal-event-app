@@ -312,6 +312,7 @@ function Profile() {
         {editingAddress ? (
           <div>
             <input
+              className="address-input"
               type="text"
               value={newAddress}
               onChange={(e) => setNewAddress(e.target.value)}
