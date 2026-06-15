@@ -317,13 +317,16 @@ function Profile() {
               onChange={(e) => setNewAddress(e.target.value)}
             />
 
-            <button onClick={updateAddress}>Guardar</button>
+            <button className="save-button" onClick={updateAddress}></button>
           </div>
         ) : (
           <div>
             <p>📍 {user?.address || "Sin dirección"}</p>
 
-            <button onClick={() => setEditingAddress(true)}>Editar</button>
+            <button
+              className="edit-button"
+              onClick={() => setEditingAddress(true)}
+            ></button>
           </div>
         )}
       </div>
@@ -462,9 +465,10 @@ function Profile() {
                 onChange={(e) => setEventDate(e.target.value)}
               />
 
-              <button onClick={editingEventId ? updateEvent : createEvent}>
-                {editingEventId ? "Guardar Cambios" : "Guardar Evento"}
-              </button>
+              <button
+                className="create-event-button"
+                onClick={editingEventId ? updateEvent : createEvent}
+              ></button>
             </div>
           )}
 
@@ -500,7 +504,10 @@ function Profile() {
                       <small>
                         {new Date(event.event_date).toLocaleDateString()}
                       </small>
-                      <button onClick={() => fetchAttendeesForEvent(event.id)}>
+                      <button
+                        className="attendees-button"
+                        onClick={() => fetchAttendeesForEvent(event.id)}
+                      >
                         👥 Ver asistentes
                       </button>
                       {openAttendeesEvent === event.id && (
@@ -521,11 +528,17 @@ function Profile() {
 
                       {organizerMode && (
                         <div className="event-actions">
-                          <button onClick={() => editEvent(event)}>
+                          <button
+                            className="edit-button"
+                            onClick={() => editEvent(event)}
+                          >
                             Editar
                           </button>
 
-                          <button onClick={() => deleteEvent(event.id)}>
+                          <button
+                            className="delete-button"
+                            onClick={() => deleteEvent(event.id)}
+                          >
                             Eliminar
                           </button>
                         </div>
