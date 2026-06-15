@@ -468,7 +468,10 @@ function Profile() {
             </div>
           )}
 
-          <button onClick={() => setShowCreateEvent(!showCreateEvent)}>
+          <button
+            className="create-event-button"
+            onClick={() => setShowCreateEvent(!showCreateEvent)}
+          >
             Crear Evento
           </button>
 

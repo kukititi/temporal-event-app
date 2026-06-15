@@ -224,24 +224,20 @@
   margin-bottom: 30px;
 }
 
-.edit-button {
-  background: #2563eb;
-  color: white;
-}
-
-.delete-button {
-  background: #dc2626;
-  color: white;
-}
-
-.attendees-button {
-  background: #059669;
-  color: white;
-}
-
 .profile-events-container {
   display: flex;
   flex-direction: column;
 
   gap: 15px;
+}
+
+.create-event-button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #49c5cd, #2b7a78);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
 }
