@@ -26,15 +26,13 @@ function Navbar() {
           <Link to="/events">Eventos</Link>
         </li>
 
-        {user && (
-          <li>
-            <Link to="/profile">👤 Perfil</Link>
-          </li>
-        )}
-
         {user ? (
           <>
-            <li className="navbar-user">👤 {user.username}</li>
+            <li>
+              <Link to="/profile" className="navbar-user">
+                👤 {user.username}
+              </Link>
+            </li>
 
             <li>
               <button className="logout-button" onClick={logout}>

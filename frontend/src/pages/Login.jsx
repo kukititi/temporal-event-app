@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useState } from "react";
 
@@ -6,6 +6,8 @@ import "../styles/auth.css";
 import API_URL from "../config/api";
 
 function Login() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -34,12 +36,9 @@ function Login() {
       if (response.ok) {
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        alert("Login exitoso 🚀");
-
         console.log("Usuario guardado:", data.user);
 
-        setEmail("");
-        setPassword("");
+        navigate("/profile");
       } else {
         alert(data.message);
       }
