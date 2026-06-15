@@ -3,6 +3,14 @@ import logo from "../assets/tea-logo.png";
 
 import "../styles/navbar.css";
 
+const user = JSON.parse(localStorage.getItem("user"));
+
+function logout() {
+  localStorage.removeItem("user");
+
+  window.location.href = "/";
+}
+
 function Navbar() {
   return (
     <nav className="navbar">
@@ -23,13 +31,21 @@ function Navbar() {
           <Link to="/profile">Perfil</Link>
         </li>
 
-        <li>
-          <Link to="/login">Ingresar</Link>
-        </li>
+        {user ? (
+          <>
+            <span className="navbar-user">👤 {user.username}</span>
 
-        <li>
-          <Link to="/register">Registro</Link>
-        </li>
+            <button className="logout-button" onClick={logout}>
+              Cerrar Sesión
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login">Ingresar</Link>
+
+            <Link to="/register">Registro</Link>
+          </>
+        )}
       </ul>
     </nav>
   );

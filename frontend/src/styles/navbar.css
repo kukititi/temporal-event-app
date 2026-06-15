@@ -105,3 +105,23 @@
 .navbar-logo-image:hover {
   transform: scale(1.05);
 }
+
+.logout-button {
+  padding: 8px 14px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #dc2626;
+
+  color: white;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.logout-button:hover {
+  background: #b91c1c;
+}
