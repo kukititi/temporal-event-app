@@ -392,6 +392,23 @@ function Profile() {
             )}
           </div>
         )}
+
+        {stats && (
+          <div className="stats-card">
+            <h3>📊 Estadísticas</h3>
+
+            <p>Eventos creados: {stats.totalEvents}</p>
+
+            <p>Asistentes totales: {stats.totalAttendees}</p>
+
+            {stats.mostPopularEvent && (
+              <p>
+                Evento más popular: {stats.mostPopularEvent.title} (
+                {stats.mostPopularEvent.attendees} asistentes)
+              </p>
+            )}
+          </div>
+        )}
       </div>
       <div className="profile-organizer">
         <h2>Modo Organizador</h2>
@@ -403,23 +420,6 @@ function Profile() {
       {organizerMode && (
         <div className="organizer-panel">
           <h2>Panel de Organizador</h2>
-
-          {stats && (
-            <div className="stats-card">
-              <h3>📊 Estadísticas</h3>
-
-              <p>Eventos creados: {stats.totalEvents}</p>
-
-              <p>Asistentes totales: {stats.totalAttendees}</p>
-
-              {stats.mostPopularEvent && (
-                <p>
-                  Evento más popular: {stats.mostPopularEvent.title} (
-                  {stats.mostPopularEvent.attendees} asistentes)
-                </p>
-              )}
-            </div>
-          )}
 
           {showCreateEvent && (
             <div className="create-event-form">

@@ -121,12 +121,35 @@
   border-color: #49c5cd;
 }
 
-.organizer-button {
-  margin-top: 15px;
-  padding: 12px 20px;
-  border: none;
-  border-radius: 10px;
+.organizer-button,
+.accordion-button {
+  width: 100%;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  border: 1px solid rgba(73, 197, 205, 0.3);
+
+  background: #133b5c;
+
+  color: #49c5cd;
+
+  font-size: 16px;
+  font-weight: bold;
+
   cursor: pointer;
+
+  transition: all 0.3s ease;
+}
+
+.organizer-button:hover,
+.accordion-button:hover {
+  background: #49c5cd;
+
+  color: #06131f;
+
+  transform: translateY(-2px);
 }
 
 .organizer-panel {
@@ -199,4 +222,39 @@
 
 .stats-card h3 {
   margin-top: 0;
+}
+
+.profile-favorites,
+.profile-organizer {
+  width: 90%;
+  max-width: 600px;
+
+  margin-bottom: 40px;
+}
+
+.profile-events {
+  border: 2px solid red;
+}
+
+.profile-favorites {
+  border: 2px solid green;
+}
+
+.profile-organizer {
+  border: 2px solid yellow;
+}
+
+.edit-button {
+  background: #2563eb;
+  color: white;
+}
+
+.delete-button {
+  background: #dc2626;
+  color: white;
+}
+
+.attendees-button {
+  background: #059669;
+  color: white;
 }
