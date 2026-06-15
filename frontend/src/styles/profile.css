@@ -301,9 +301,8 @@
   color: #06131f;
 }
 
-.address-imput {
+.address-input {
   width: 100%;
-
   max-width: 350px;
 
   padding: 10px 14px;
@@ -315,4 +314,30 @@
   background: rgba(255, 255, 255, 0.05);
 
   color: white;
+
+  outline: none;
+}
+
+.address-input:focus {
+  border-color: #49c5cd;
+
+  box-shadow: 0 0 10px rgba(73, 197, 205, 0.3);
+}
+
+.save-button {
+  margin-left: 10px;
+
+  padding: 10px 16px;
+
+  border: none;
+
+  border-radius: 10px;
+
+  background: #49c5cd;
+
+  color: #06131f;
+
+  font-weight: bold;
+
+  cursor: pointer;
 }

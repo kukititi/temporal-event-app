@@ -318,7 +318,9 @@ function Profile() {
               onChange={(e) => setNewAddress(e.target.value)}
             />
 
-            <button className="save-button" onClick={updateAddress}></button>
+            <button className="save-button" onClick={updateAddress}>
+              Guardar
+            </button>
           </div>
         ) : (
           <div className="address-container">
