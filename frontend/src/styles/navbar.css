@@ -146,3 +146,19 @@
 .navbar-logo {
   text-decoration: none;
 }
+
+body.light .navbar {
+  background: rgba(255, 255, 255, 0.9);
+
+  border-bottom: 1px solid #d1d5db;
+}
+
+body.light .navbar-links a {
+  color: #374151;
+}
+
+body.light .navbar-user {
+  color: #2563eb;
+
+  background: rgba(37, 99, 235, 0.1);
+}
