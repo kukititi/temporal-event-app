@@ -1,138 +1,152 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+/* ============================================================
+   TOKENS DE TEMA — fuente única de verdad de los colores
+   ------------------------------------------------------------
+   Regla de oro: entre tema claro y oscuro SOLO cambian colores,
+   nunca tamaños, paddings ni posiciones. Por eso la estructura
+   nunca se deforma al cambiar de tema.
 
-  --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-  --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+   El <body> lleva la clase "dark" o "light" (la pone el toggle
+   del Navbar). Si no hay clase todavía, usa los valores de :root
+   (oscuro por defecto), evitando parpadeos al cargar.
+   ============================================================ */
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root,
+body.dark {
+  --bg-1: #06131f; /* fondo de página (inicio del degradado) */
+  --bg-2: #0d1b2a; /* fondo de página (fin del degradado) */
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --surface: #11314a; /* tarjetas y paneles */
+  --surface-2: #0b1622; /* inputs y chips */
+  --surface-translucent: rgba(19, 59, 92, 0.7);
+
+  --text: #f1f5f9; /* texto principal */
+  --text-muted: #9ca3af; /* texto secundario */
+  --heading: #ffffff; /* títulos h1 / h2 */
+
+  --border: rgba(73, 197, 205, 0.2);
+
+  --accent: #49c5cd; /* relleno de botones de marca */
+  --accent-text: #49c5cd; /* texto / enlaces de marca */
+  --accent-contrast: #06131f; /* texto sobre relleno accent */
+  --accent-soft: rgba(73, 197, 205, 0.12);
+
+  --nav-bg: rgba(6, 19, 31, 0.8);
+  --nav-border: rgba(255, 255, 255, 0.06);
+
+  --shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+body.light {
+  --bg-1: #f4f7fb;
+  --bg-2: #e8eef5;
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  --surface-translucent: #ffffff;
+
+  --text: #1f2937;
+  --text-muted: #6b7280;
+  --heading: #0f172a;
+
+  --border: #dbe2ea;
+
+  --accent: #2bb7c4;
+  --accent-text: #0e7c86; /* teal oscuro: legible sobre blanco */
+  --accent-contrast: #06131f;
+  --accent-soft: rgba(43, 183, 196, 0.12);
+
+  --nav-bg: rgba(255, 255, 255, 0.85);
+  --nav-border: #e2e8f0;
+
+  --shadow: 0 10px 25px rgba(15, 23, 42, 0.1);
 }
 
+/* ============================================================
+   BASE
+   ============================================================ */
 * {
   box-sizing: border-box;
+}
+
+html {
+  color-scheme: light dark;
 }
 
 body {
   margin: 0;
   padding: 0;
-
   overflow-x: hidden;
 
-  font-family: Arial, sans-serif;
+  font-family: system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 18px;
+  line-height: 145%;
+  letter-spacing: 0.18px;
 
-  background-color: #030712;
+  background: var(--bg-1);
+  color: var(--text);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Transición suave al cambiar de tema */
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
 #root {
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
+
   text-align: center;
-  border-inline: 1px solid var(--border);
+
   min-height: 100svh;
+
   display: flex;
   flex-direction: column;
-  box-sizing: border-box;
+
+  border-inline: 1px solid var(--border);
 }
 
 h1,
 h2 {
-  font-family: var(--heading);
   font-weight: 500;
-  color: var(--text-h);
+  color: var(--heading);
 }
 
 h1 {
   font-size: 56px;
   letter-spacing: -1.68px;
   margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
 }
+
 h2 {
   font-size: 24px;
   line-height: 118%;
   letter-spacing: -0.24px;
   margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
 }
+
 p {
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
+@media (max-width: 1024px) {
+  body {
+    font-size: 16px;
+  }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  h1 {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
 }
 
 .main-content {
   padding-top: 100px;
-}
-
-body.dark {
-  background: #06131f;
-
-  color: white;
-}
-
-body.light {
-  background: #f4f7fb;
-
-  color: #1f2937;
 }
