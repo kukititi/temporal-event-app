@@ -473,7 +473,9 @@ function Profile() {
               <button
                 className="create-event-button"
                 onClick={editingEventId ? updateEvent : createEvent}
-              ></button>
+              >
+                {editingEventId ? "Guardar Cambios" : "Guardar Evento"}
+              </button>
             </div>
           )}
 
