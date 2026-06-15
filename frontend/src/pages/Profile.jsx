@@ -47,6 +47,8 @@ function Profile() {
 
   const [showFavorites, setShowFavorites] = useState(false);
 
+  const [eventAttendeesCount, setEventAttendeesCount] = useState({});
+
   async function fetchAttendedEvents() {
     try {
       if (!user) return;
@@ -229,6 +231,10 @@ function Profile() {
       const data = await response.json();
 
       setMyEvents(data);
+
+      data.forEach((event) => {
+        fetchAttendeesCount(event.id);
+      });
     } catch (error) {
       console.log(error);
     }
@@ -255,6 +261,23 @@ function Profile() {
       setSelectedEventAttendees(data);
 
       setOpenAttendeesEvent(eventId);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function fetchAttendeesCount(eventId) {
+    try {
+      const response = await fetch(
+        `${API_URL}/events/${eventId}/attendees-count`,
+      );
+
+      const data = await response.json();
+
+      setEventAttendeesCount((prev) => ({
+        ...prev,
+        [eventId]: data.attendees,
+      }));
     } catch (error) {
       console.log(error);
     }
@@ -507,6 +530,10 @@ function Profile() {
                       <p>{event.category}</p>
 
                       <p>📍 {event.address}</p>
+
+                      <p className="attendees-counter">
+                        👥 {eventAttendeesCount[event.id] || 0} asistentes
+                      </p>
 
                       <small>
                         {new Date(event.event_date).toLocaleDateString()}

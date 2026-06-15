@@ -393,3 +393,9 @@
 
   resize: vertical;
 }
+
+.attendees-counter {
+  color: #49c5cd;
+
+  font-weight: bold;
+}
