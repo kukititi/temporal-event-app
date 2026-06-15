@@ -207,17 +207,14 @@
 }
 
 .stats-card {
-  width: 100%;
+  width: 90%;
+  max-width: 600px;
+
+  margin: 20px auto;
 
   padding: 20px;
 
   border-radius: 16px;
-
-  background: rgba(73, 197, 205, 0.1);
-
-  border: 1px solid rgba(73, 197, 205, 0.3);
-
-  margin-bottom: 20px;
 }
 
 .stats-card h3 {
@@ -229,19 +226,9 @@
   width: 90%;
   max-width: 600px;
 
-  margin-bottom: 40px;
-}
+  text-align: center;
 
-.profile-events {
-  border: 2px solid red;
-}
-
-.profile-favorites {
-  border: 2px solid green;
-}
-
-.profile-organizer {
-  border: 2px solid yellow;
+  margin-bottom: 30px;
 }
 
 .edit-button {
