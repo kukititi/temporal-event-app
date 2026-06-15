@@ -7,7 +7,7 @@
   justify-content: space-between;
   align-items: center;
 
-  padding: 20px 50px;
+  padding: 12px 40px;
 
   position: fixed;
   top: 0;
@@ -42,13 +42,17 @@
 
   text-decoration: none;
 
-  font-size: 1rem;
+  padding: 8px 14px;
 
-  transition: 0.3s;
+  border-radius: 10px;
+
+  transition: all 0.3s ease;
 }
 
 .navbar-links a:hover {
   color: #49c5cd;
+
+  background: rgba(73, 197, 205, 0.1);
 }
 
 @media (max-width: 900px) {
@@ -93,13 +97,8 @@
 }
 
 .navbar-logo-image {
-  width: 90px;
-
-  height: 90px;
-
-  object-fit: contain;
-
-  transition: 0.3s;
+  width: 48px;
+  height: 48px;
 }
 
 .navbar-logo-image:hover {
@@ -120,10 +119,16 @@
   cursor: pointer;
 
   transition: 0.3s;
+
+  font-weight: bold;
+
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.2);
 }
 
 .logout-button:hover {
   background: #b91c1c;
+
+  transform: translateY(-2px);
 }
 
 .navbar-user {
@@ -131,6 +136,9 @@
 
   font-weight: bold;
 
-  display: flex;
-  align-items: center;
+  padding: 8px 14px;
+
+  border-radius: 10px;
+
+  background: rgba(73, 197, 205, 0.1);
 }
