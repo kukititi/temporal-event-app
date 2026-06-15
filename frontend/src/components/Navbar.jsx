@@ -13,15 +13,11 @@ function Navbar() {
   const user = JSON.parse(localStorage.getItem("user"));
   return (
     <nav className="navbar">
-      <div className="navbar-logo">
+      <Link to="/" className="navbar-logo">
         <img src={logo} alt="TEA Logo" className="navbar-logo-image" />
-      </div>
+      </Link>
 
       <ul className="navbar-links">
-        <li>
-          <Link to="/">Inicio</Link>
-        </li>
-
         <li>
           <Link to="/events">Eventos</Link>
         </li>
