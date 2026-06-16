@@ -467,3 +467,19 @@ body.light .stats-card {
 
   border: 1px solid rgba(73, 197, 205, 0.25);
 }
+
+body.light .organizer-button {
+  background: linear-gradient(135deg, #1e7493, #133b5c);
+
+  color: white;
+
+  border: none;
+
+  box-shadow: 0 4px 15px rgba(30, 116, 147, 0.25);
+}
+
+body.light .organizer-button:hover {
+  background: #163c5b;
+
+  transform: translateY(-2px);
+}
