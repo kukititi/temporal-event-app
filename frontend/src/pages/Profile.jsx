@@ -114,6 +114,18 @@ function Profile() {
     }
   }
 
+  // Limpia por completo el formulario de evento (campos + modo edición).
+  // Se usa al crear, al terminar una edición y al abrir el form para crear.
+  function resetEventForm() {
+    setEditingEventId(null);
+    setEventTitle("");
+    setEventDescription("");
+    setEventCategory("");
+    setEventLocation("");
+    setEventAddress("");
+    setEventDate("");
+  }
+
   async function createEvent() {
     try {
       const response = await fetch(`${API_URL}/events`, {
@@ -138,12 +150,7 @@ function Profile() {
 
       alert("Evento creado 🚀");
 
-      setEventTitle("");
-      setEventDescription("");
-      setEventCategory("");
-      setEventLocation("");
-      setEventAddress("");
-      setEventDate("");
+      resetEventForm();
 
       setShowCreateEvent(false);
     } catch (error) {
@@ -178,7 +185,7 @@ function Profile() {
         ),
       );
 
-      setEditingEventId(null);
+      resetEventForm();
 
       setShowCreateEvent(false);
 
@@ -493,18 +500,40 @@ function Profile() {
                 onChange={(e) => setEventDate(e.target.value)}
               />
 
-              <button
-                className="create-event-button"
-                onClick={editingEventId ? updateEvent : createEvent}
-              >
-                {editingEventId ? "Guardar Cambios" : "Guardar Evento"}
-              </button>
+              <div className="event-actions">
+                <button
+                  className="create-event-button"
+                  onClick={editingEventId ? updateEvent : createEvent}
+                >
+                  {editingEventId ? "Guardar Cambios" : "Guardar Evento"}
+                </button>
+
+                <button
+                  className="create-event-button"
+                  style={{
+                    background: "var(--surface-2)",
+                    color: "var(--text)",
+                    border: "1px solid var(--border)",
+                  }}
+                  onClick={() => {
+                    resetEventForm();
+                    setShowCreateEvent(false);
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
             </div>
           )}
 
           <button
             className="create-event-button"
-            onClick={() => setShowCreateEvent(!showCreateEvent)}
+            onClick={() => {
+              const abriendo = !showCreateEvent;
+              setShowCreateEvent(abriendo);
+              // Al ABRIR para crear, limpiamos cualquier rastro de una edición previa
+              if (abriendo) resetEventForm();
+            }}
           >
             Crear Evento
           </button>
