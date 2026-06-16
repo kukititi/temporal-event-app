@@ -130,6 +130,8 @@ body.light .event-card {
   color: #1f2937;
 
   border: 1px solid #d1d5db;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .event-card:hover {
@@ -218,7 +220,6 @@ body.light .event-card {
 
   cursor: pointer;
 
-  font-size: 15px;
   font-weight: bold;
 
   background: linear-gradient(135deg, #0f766e, #14b8a6);
@@ -231,11 +232,23 @@ body.light .event-card {
 .favorite-button:hover {
   transform: translateY(-2px);
 
-  box-shadow: 0 0 15px rgba(20, 184, 166, 0.4);
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.3);
 }
 
-body.light .event-card h2,
+body.light .event-card h2 {
+  color: #111827;
+}
+
 body.light .event-card p,
-body.light .event-card span {
-  color: #1f2937;
+body.light .event-card span,
+body.light .event-card small {
+  color: #4b5563;
+}
+
+body.light .active-filter {
+  background: #49c5cd;
+
+  color: white;
+
+  border-color: #49c5cd;
 }
