@@ -8,13 +8,9 @@
   padding-left: 30px;
   padding-right: 30px;
 
-  background:
-    radial-gradient(
-      circle at center,
-      rgba(79, 209, 197, 0.08),
-      transparent 60%
-    ),
-    #020617;
+  background: linear-gradient(135deg, var(--bg-1), var(--bg-2));
+
+  color: var(--text);
 }
 
 .map-search-container {
@@ -26,13 +22,11 @@
 
   padding: 18px;
 
-  border: none;
-
   border-radius: 20px;
 
-  background: rgba(30, 41, 59, 0.9);
+  background: var(--surface-2);
 
-  color: white;
+  color: var(--text);
 
   font-size: 1rem;
 
@@ -40,9 +34,19 @@
 
   backdrop-filter: blur(10px);
 
-  border: 1px solid rgba(79, 209, 197, 0.15);
+  border: 1px solid var(--border);
 }
 
+.map-search::placeholder {
+  color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------
+   El "mapa" estilizado se mantiene oscuro en ambos temas: los
+   mapas suelen verse bien oscuros y así el contraste de los
+   pines y el radar no cambia. (Cuando integres Leaflet, este
+   bloque se reemplaza por el mapa real.)
+   ------------------------------------------------------------ */
 .map-area {
   position: relative;
 
@@ -76,21 +80,15 @@
 
 .horizontal-road {
   width: 100%;
-
   height: 12px;
-
   top: 50%;
-
   transform: translateY(-50%);
 }
 
 .vertical-road {
   width: 12px;
-
   height: 100%;
-
   left: 50%;
-
   transform: translateX(-50%);
 }
 
@@ -98,7 +96,6 @@
   position: absolute;
 
   width: 22px;
-
   height: 22px;
 
   background: #4fd1c5;
@@ -106,9 +103,7 @@
   border-radius: 50%;
 
   top: 50%;
-
   left: 50%;
-
   transform: translate(-50%, -50%);
 
   box-shadow:
@@ -124,7 +119,6 @@
   position: absolute;
 
   width: 60px;
-
   height: 60px;
 
   border-radius: 50%;
@@ -132,9 +126,7 @@
   border: 2px solid rgba(79, 209, 197, 0.2);
 
   top: 50%;
-
   left: 50%;
-
   transform: translate(-50%, -50%);
 
   animation: radarPulse 2s infinite;
@@ -143,20 +135,16 @@
 @keyframes radarPulse {
   0% {
     transform: translate(-50%, -50%) scale(0.8);
-
     opacity: 1;
   }
-
   100% {
     transform: translate(-50%, -50%) scale(1.8);
-
     opacity: 0;
   }
 }
 
 .event-marker {
   width: 18px;
-
   height: 18px;
 
   background: #22c55e;
@@ -188,13 +176,11 @@
       0 0 15px #22c55e,
       0 0 30px rgba(34, 197, 94, 0.4);
   }
-
   50% {
     box-shadow:
       0 0 25px #22c55e,
       0 0 50px rgba(34, 197, 94, 0.6);
   }
-
   100% {
     box-shadow:
       0 0 15px #22c55e,
@@ -202,6 +188,9 @@
   }
 }
 
+/* ------------------------------------------------------------
+   Lista de eventos cercanos: SÍ adapta al tema
+   ------------------------------------------------------------ */
 .nearby-events {
   margin-top: 35px;
 }
@@ -209,7 +198,7 @@
 .nearby-events h2 {
   text-align: center;
 
-  color: white;
+  color: var(--heading);
 
   margin-bottom: 25px;
 
@@ -217,7 +206,7 @@
 }
 
 .nearby-card {
-  background: rgba(30, 41, 59, 0.9);
+  background: var(--surface);
 
   border-radius: 24px;
 
@@ -225,7 +214,11 @@
 
   margin-bottom: 20px;
 
-  border: 1px solid rgba(79, 209, 197, 0.12);
+  border: 1px solid var(--border);
+
+  color: var(--text);
+
+  box-shadow: var(--shadow);
 
   transition: 0.3s;
 }
@@ -233,24 +226,24 @@
 .nearby-card:hover {
   transform: translateY(-3px);
 
-  border-color: rgba(79, 209, 197, 0.3);
+  border-color: var(--accent);
 }
 
 .nearby-card h3 {
-  color: white;
+  color: var(--text);
 
   margin-bottom: 10px;
 }
 
 .nearby-card p {
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
+/* Popup flotante sobre el mapa estilizado (se mantiene oscuro) */
 .map-popup {
   position: absolute;
 
   top: 25px;
-
   right: 25px;
 
   width: 260px;
@@ -275,71 +268,51 @@
 @keyframes popupAppear {
   from {
     opacity: 0;
-
     transform: translateY(-10px);
   }
-
   to {
     opacity: 1;
-
     transform: translateY(0);
   }
 }
 
 .map-popup h3 {
   color: white;
-
   font-size: 1.3rem;
-
   margin-bottom: 12px;
 }
 
 .map-popup p {
   color: #4fd1c5;
-
   margin-bottom: 10px;
-
   font-weight: 600;
 }
 
 .map-popup span {
   display: block;
-
   color: #cbd5e1;
-
   margin-bottom: 8px;
 }
 
 .map-popup small {
   display: block;
-
   color: #94a3b8;
-
   margin-bottom: 16px;
 }
 
 .map-popup button {
   width: 100%;
-
   padding: 12px;
-
   border: none;
-
   border-radius: 14px;
-
   background: #4fd1c5;
-
   color: #03111f;
-
   font-weight: bold;
-
   cursor: pointer;
-
   transition: 0.3s;
 }
 
 .map-popup button:hover {
   transform: scale(1.03);
-
   background: #67e8f9;
 }
