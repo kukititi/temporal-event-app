@@ -75,9 +75,9 @@ body.light .search-bar {
 body.light .filter-button {
   background: white;
 
-  color: #374151;
+  color: #1e7493;
 
-  border: 1px solid #d1d5db;
+  border: 1px solid rgba(73, 197, 205, 0.3);
 }
 
 .sort-container {
@@ -125,13 +125,11 @@ body.light .filter-button {
 }
 
 body.light .event-card {
-  background: white;
+  background: #f7fafb;
 
-  color: #1f2937;
+  border: 1px solid rgba(73, 197, 205, 0.25);
 
-  border: 1px solid #d1d5db;
-
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .event-card:hover {
@@ -236,19 +234,17 @@ body.light .event-card {
 }
 
 body.light .event-card h2 {
-  color: #111827;
+  color: #1f2937;
 }
 
 body.light .event-card p,
 body.light .event-card span,
 body.light .event-card small {
-  color: #4b5563;
+  color: #5b6775;
 }
 
 body.light .active-filter {
-  background: #49c5cd;
+  background: linear-gradient(135deg, #49c5cd, #1e7493);
 
   color: white;
-
-  border-color: #49c5cd;
 }

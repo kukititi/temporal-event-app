@@ -148,17 +148,21 @@
 }
 
 body.light .navbar {
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(247, 250, 251, 0.95);
 
-  border-bottom: 1px solid #d1d5db;
+  backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid rgba(73, 197, 205, 0.2);
 }
 
 body.light .navbar-links a {
-  color: #374151;
+  color: #1f2937;
+}
+
+body.light .navbar-links a:hover {
+  color: #1e7493;
 }
 
 body.light .navbar-user {
-  color: #2563eb;
-
-  background: rgba(37, 99, 235, 0.1);
+  color: #1e7493;
 }

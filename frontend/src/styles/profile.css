@@ -157,15 +157,12 @@
   gap: 20px;
 }
 
-.accordion-button {
-  width: 100%;
-  padding: 12px;
-  margin: 15px 0;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: bold;
+body.light .accordion-button {
+  background: rgba(73, 197, 205, 0.12);
+
+  color: #1e7493;
+
+  border: 1px solid rgba(73, 197, 205, 0.2);
 }
 
 .event-actions {
@@ -212,6 +209,14 @@
 
 .stats-card h3 {
   margin-top: 0;
+}
+
+body.light .stats-card {
+  background: #f7fafb;
+
+  color: #1f2937;
+
+  border: 1px solid rgba(73, 197, 205, 0.2);
 }
 
 .profile-favorites,
