@@ -227,3 +227,15 @@ body.light .event-card {
 
   transition: all 0.3s ease;
 }
+
+.favorite-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.4);
+}
+
+body.light .event-card h2,
+body.light .event-card p,
+body.light .event-card span {
+  color: #1f2937;
+}
