@@ -13,6 +13,12 @@
   color: white;
 }
 
+body.light .profile-container {
+  background: #dfe8ec;
+
+  color: #1f2937;
+}
+
 .profile-header {
   display: flex;
   flex-direction: column;
@@ -403,4 +409,61 @@ body.light .stats-card {
   color: #49c5cd;
 
   font-weight: bold;
+}
+
+body.light .profile-header h2 {
+  color: #1e7493;
+}
+
+body.light .profile-header h3,
+body.light .profile-header p,
+body.light .profile-header span {
+  color: #4b5563;
+}
+
+body.light .interest-tag {
+  background: white;
+
+  color: #1e7493;
+
+  border: 1px solid rgba(73, 197, 205, 0.3);
+}
+
+body.light .accordion-button {
+  background: rgba(73, 197, 205, 0.12);
+
+  color: #1e7493;
+
+  border: 1px solid rgba(73, 197, 205, 0.25);
+}
+
+body.light .organizer-panel {
+  color: #1f2937;
+}
+
+body.light .create-event-form {
+  background: white;
+
+  border: 1px solid rgba(73, 197, 205, 0.25);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+
+  border-radius: 20px;
+
+  padding: 20px;
+}
+
+body.light .create-event-form input,
+body.light .create-event-form textarea {
+  background: #f7fafb;
+
+  color: #1f2937;
+
+  border: 1px solid rgba(73, 197, 205, 0.25);
+}
+
+body.light .stats-card {
+  background: linear-gradient(135deg, #f7fafb, #eef6f8);
+
+  border: 1px solid rgba(73, 197, 205, 0.25);
 }
