@@ -167,6 +167,31 @@ router.put("/:id/address", async (req, res) => {
   }
 });
 
+router.put("/:id/interests", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { interests } = req.body; // arreglo de strings, ej: ["Gaming","Anime"]
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET interests = $1
+      WHERE id = $2
+      RETURNING *
+      `,
+      [interests, id],
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error actualizando intereses",
+    });
+  }
+});
+
 router.get("/:id/favorites", async (req, res) => {
   try {
     const { id } = req.params;

@@ -1,0 +1,113 @@
+.interests-card {
+  max-width: 520px;
+}
+
+.interests-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+
+  margin: 20px 0;
+}
+
+/* Chip seleccionable */
+.interest-chip {
+  padding: 10px 18px;
+
+  border-radius: 20px;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface-2);
+
+  color: var(--text);
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.interest-chip:hover {
+  border-color: var(--accent);
+}
+
+/* Estado seleccionado */
+.interest-chip.selected {
+  background: var(--accent);
+
+  color: var(--accent-contrast);
+
+  border-color: var(--accent);
+}
+
+.interests-add {
+  display: flex;
+  gap: 10px;
+
+  margin-bottom: 20px;
+}
+
+.interests-add input {
+  flex: 1;
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  border: 1px solid var(--border);
+
+  background: var(--surface-2);
+
+  color: var(--text);
+
+  outline: none;
+}
+
+.interests-add input::placeholder {
+  color: var(--text-muted);
+}
+
+.interests-add button {
+  padding: 12px 18px;
+
+  border: none;
+
+  border-radius: 12px;
+
+  background: var(--accent-soft);
+
+  color: var(--accent-text);
+
+  font-weight: bold;
+
+  cursor: pointer;
+}
+
+.interests-save {
+  width: 100%;
+
+  padding: 14px;
+
+  border: none;
+
+  border-radius: 16px;
+
+  background: var(--accent);
+
+  color: var(--accent-contrast);
+
+  font-size: 1rem;
+  font-weight: bold;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+.interests-save:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}

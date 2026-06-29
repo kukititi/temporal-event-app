@@ -302,14 +302,8 @@ function Profile() {
     }
   }
 
-  const interests = [
-    "Gaming",
-    "Música",
-    "Tecnología",
-    "Anime",
-    "Robótica",
-    "Películas",
-  ];
+  // Intereses reales del usuario (elegidos al registrarse o editados luego)
+  const interests = Array.isArray(user?.interests) ? user.interests : [];
 
   useEffect(() => {
     const loadData = async () => {
@@ -370,12 +364,24 @@ function Profile() {
         <h2>Intereses</h2>
 
         <div className="interests-container">
-          {interests.map((interest, index) => (
-            <div key={index} className="interest-tag">
-              {interest}
-            </div>
-          ))}
+          {interests.length === 0 ? (
+            <p>Aún no has elegido intereses.</p>
+          ) : (
+            interests.map((interest, index) => (
+              <div key={index} className="interest-tag">
+                {interest}
+              </div>
+            ))
+          )}
         </div>
+
+        <a
+          className="address-edit-button"
+          href="/intereses"
+          style={{ display: "inline-block", marginTop: "15px" }}
+        >
+          ✏️ Editar intereses
+        </a>
       </div>
 
       <div className="profile-events">

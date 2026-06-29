@@ -41,13 +41,11 @@ function Register() {
       console.log(data);
 
       if (response.ok) {
-        alert("Usuario creado correctamente 🚀");
+        // Auto-login: guardamos el usuario recién creado...
+        localStorage.setItem("user", JSON.stringify(data.user));
 
-        setUsername("");
-        setEmail("");
-        setPassword("");
-        setCity("");
-        setAddress("");
+        // ...y lo llevamos a elegir sus intereses.
+        window.location.href = "/intereses";
       } else {
         alert(data.message);
       }
