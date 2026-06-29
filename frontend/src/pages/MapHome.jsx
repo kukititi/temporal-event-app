@@ -16,9 +16,11 @@ function MapHome() {
 
       const data = await response.json();
 
-      setEvents(data);
+      // Solo guardamos si la respuesta es una lista; si no, dejamos lista vacía.
+      setEvents(Array.isArray(data) ? data : []);
     } catch (error) {
       console.log(error);
+      setEvents([]);
     }
   }
 
@@ -26,11 +28,14 @@ function MapHome() {
     fetchEvents();
   }, []);
 
+  const term = search.toLowerCase();
+
+  // Protegemos cada campo con (campo || "") para que un valor vacío no rompa la app.
   const filteredEvents = events.filter(
     (event) =>
-      event.title.toLowerCase().includes(search.toLowerCase()) ||
-      event.category.toLowerCase().includes(search.toLowerCase()) ||
-      event.location.toLowerCase().includes(search.toLowerCase()),
+      (event.title || "").toLowerCase().includes(term) ||
+      (event.category || "").toLowerCase().includes(term) ||
+      (event.location || "").toLowerCase().includes(term),
   );
 
   return (

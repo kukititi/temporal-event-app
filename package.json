@@ -1,5 +1,15 @@
 {
+  "name": "temporal-event-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "install:all": "npm install && npm --prefix backend install && npm --prefix frontend install"
+  },
   "dependencies": {
     "react-router-dom": "^7.15.1"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
   }
 }

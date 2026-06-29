@@ -1,3 +1,3 @@
-const API_URL = "https://tea-backend-7ua8.onrender.com";
+const API_URL = "http://localhost:3000";
 
 export default API_URL;
