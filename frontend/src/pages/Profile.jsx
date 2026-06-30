@@ -16,6 +16,8 @@ function Profile() {
   const [editingProfile, setEditingProfile] = useState(false);
   const [newName, setNewName] = useState(user?.name || "");
   const [newAvatar, setNewAvatar] = useState(user?.avatar_url || "");
+  const [newEmail, setNewEmail] = useState(user?.email || "");
+  const [newCity, setNewCity] = useState(user?.city || "");
   const [showAllInterests, setShowAllInterests] = useState(false);
 
   const [newAddress, setNewAddress] = useState(user?.address || "");
@@ -33,6 +35,8 @@ function Profile() {
   const [eventAddress, setEventAddress] = useState("");
 
   const [eventDate, setEventDate] = useState("");
+  const [eventEndDate, setEventEndDate] = useState("");
+  const [eventImage, setEventImage] = useState("");
 
   const [editingEventId, setEditingEventId] = useState(null);
 
@@ -129,9 +133,45 @@ function Profile() {
     setEventLocation("");
     setEventAddress("");
     setEventDate("");
+    setEventEndDate("");
+    setEventImage("");
+  }
+
+  // Sube la imagen de portada como archivo (la reduce y guarda en base64)
+  function handleEventImage(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 800;
+        let width = img.width;
+        let height = img.height;
+        if (width > max) {
+          height = (height * max) / width;
+          width = max;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        setEventImage(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
   async function createEvent() {
+    if (!eventDate || !eventEndDate) {
+      alert("Debes indicar fecha/hora de inicio y de fin.");
+      return;
+    }
+    if (new Date(eventEndDate) <= new Date(eventDate)) {
+      alert("La hora de fin debe ser posterior a la de inicio.");
+      return;
+    }
     try {
       const response = await fetch(`${API_URL}/events`, {
         method: "POST",
@@ -145,6 +185,8 @@ function Profile() {
           location: eventLocation,
           address: eventAddress,
           event_date: eventDate,
+          end_date: eventEndDate,
+          image_url: eventImage,
           created_by: user.id,
         }),
       });
@@ -179,6 +221,8 @@ function Profile() {
           location: eventLocation,
           address: eventAddress,
           event_date: eventDate,
+          end_date: eventEndDate,
+          image_url: eventImage,
         }),
       });
 
@@ -232,6 +276,9 @@ function Profile() {
     if (event.event_date) {
       setEventDate(event.event_date.slice(0, 16));
     }
+
+    setEventEndDate(event.end_date ? event.end_date.slice(0, 16) : "");
+    setEventImage(event.image_url || "");
 
     setShowCreateEvent(true);
   }
@@ -326,7 +373,13 @@ function Profile() {
       const response = await fetch(`${API_URL}/users/${user.id}/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, avatar_url: newAvatar }),
+        body: JSON.stringify({
+          name: newName,
+          avatar_url: newAvatar,
+          address: newAddress,
+          email: newEmail,
+          city: newCity,
+        }),
       });
 
       if (!response.ok) {
@@ -344,22 +397,79 @@ function Profile() {
     }
   }
 
+  // Sube una imagen como ARCHIVO: la reduce a 256px y la guarda como
+  // base64 en avatar_url (sin necesidad de almacenamiento externo).
+  function handleAvatarFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 256;
+        let width = img.width;
+        let height = img.height;
+        if (width > height && width > max) {
+          height = (height * max) / width;
+          width = max;
+        } else if (height > max) {
+          width = (width * max) / height;
+          height = max;
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+        setNewAvatar(canvas.toDataURL("image/jpeg", 0.8));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
   return (
     <div className="profile-container">
       <div className="profile-header">
-        <img
-          src={
-            user?.avatar_url ||
-            "https://cdn-icons-png.flaticon.com/512/847/847969.png"
-          }
-          alt="Perfil"
-          className="profile-image"
-        />
+        {editingProfile ? (
+          <label className="avatar-edit">
+            <img
+              src={
+                newAvatar ||
+                "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+              }
+              alt="Perfil"
+              className="profile-image"
+            />
+            <span className="avatar-edit-badge">
+              <img src="/edit-icon.png" alt="Editar" />
+            </span>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleAvatarFile}
+              style={{ display: "none" }}
+            />
+          </label>
+        ) : (
+          <img
+            src={
+              user?.avatar_url ||
+              "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+            }
+            alt="Perfil"
+            className="profile-image"
+          />
+        )}
 
         <h2>@{user?.username || "Usuario"}</h2>
 
         {editingProfile ? (
           <div className="profile-edit-form">
+            <label className="field-label">
+              <img src="/edit-icon.png" className="field-icon" alt="" />
+              Nombre
+            </label>
             <input
               className="address-input"
               type="text"
@@ -367,19 +477,53 @@ function Profile() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
             />
+
+            <label className="field-label">
+              <img src="/edit-icon.png" className="field-icon" alt="" />
+              Correo
+            </label>
+            <input
+              className="address-input"
+              type="email"
+              placeholder="Tu correo"
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+            />
+
+            <label className="field-label">
+              <img src="/edit-icon.png" className="field-icon" alt="" />
+              Ciudad
+            </label>
             <input
               className="address-input"
               type="text"
-              placeholder="URL de tu imagen de perfil"
-              value={newAvatar}
-              onChange={(e) => setNewAvatar(e.target.value)}
+              placeholder="Tu ciudad"
+              value={newCity}
+              onChange={(e) => setNewCity(e.target.value)}
             />
+
+            <label className="field-label">
+              <img src="/edit-icon.png" className="field-icon" alt="" />
+              Dirección
+            </label>
+            <input
+              className="address-input"
+              type="text"
+              placeholder="Tu dirección"
+              value={newAddress}
+              onChange={(e) => setNewAddress(e.target.value)}
+            />
+
+            <a className="profile-link-btn" href="/intereses">
+              ✏️ Editar intereses
+            </a>
+
             <div className="event-actions">
               <button className="save-button" onClick={updateProfile}>
-                Guardar perfil
+                Guardar
               </button>
               <button
-                className="address-edit-button"
+                className="profile-cancel-btn"
                 onClick={() => setEditingProfile(false)}
               >
                 Cancelar
@@ -389,43 +533,36 @@ function Profile() {
         ) : (
           <>
             <h3>{user?.name || user?.username || "Sin nombre"}</h3>
+
+            <div className="profile-fields">
+              <div className="profile-field">
+                <span className="pf-label">Correo</span>
+                <span className="pf-value">{user?.email || "—"}</span>
+              </div>
+              <div className="profile-field">
+                <span className="pf-label">Ciudad</span>
+                <span className="pf-value">{user?.city || "—"}</span>
+              </div>
+              <div className="profile-field">
+                <span className="pf-label">Dirección</span>
+                <span className="pf-value">{user?.address || "—"}</span>
+              </div>
+            </div>
+
             <button
-              className="address-edit-button"
-              onClick={() => setEditingProfile(true)}
+              className="profile-edit-btn"
+              onClick={() => {
+                setNewName(user?.name || "");
+                setNewAvatar(user?.avatar_url || "");
+                setNewAddress(user?.address || "");
+                setNewEmail(user?.email || "");
+                setNewCity(user?.city || "");
+                setEditingProfile(true);
+              }}
             >
               ✏️ Editar perfil
             </button>
           </>
-        )}
-
-        <p>{user?.email || "Sin correo"}</p>
-
-        <span>🌎 {user?.city || "Sin ciudad"}</span>
-
-        {editingAddress ? (
-          <div>
-            <input
-              className="address-input"
-              type="text"
-              value={newAddress}
-              onChange={(e) => setNewAddress(e.target.value)}
-            />
-
-            <button className="save-button" onClick={updateAddress}>
-              Guardar
-            </button>
-          </div>
-        ) : (
-          <div className="address-container">
-            <p>📍 {user?.address || "Sin dirección"}</p>
-
-            <button
-              className="address-edit-button"
-              onClick={() => setEditingAddress(true)}
-            >
-              ✏️ Editar
-            </button>
-          </div>
         )}
       </div>
 
@@ -448,23 +585,14 @@ function Profile() {
 
         {interests.length > 6 && (
           <button
-            className="address-edit-button"
+            className="show-more-btn"
             onClick={() => setShowAllInterests(!showAllInterests)}
-            style={{ marginTop: "10px" }}
           >
             {showAllInterests
-              ? "Mostrar menos"
-              : `Mostrar más (${interests.length - 6} más)`}
+              ? "Mostrar menos ▲"
+              : `Mostrar más (${interests.length - 6}) ▼`}
           </button>
         )}
-
-        <a
-          className="address-edit-button"
-          href="/intereses"
-          style={{ display: "inline-block", marginTop: "15px" }}
-        >
-          ✏️ Editar intereses
-        </a>
       </div>
 
       <div className="profile-events">
@@ -520,7 +648,7 @@ function Profile() {
           </div>
         )}
       </div>
-      {stats && (
+      {organizerMode && stats && (
         <div className="stats-card">
           <h3>📊 Estadísticas</h3>
 
@@ -583,10 +711,36 @@ function Profile() {
                 onChange={(e) => setEventAddress(e.target.value)}
               />
 
+              <label className="event-image-upload">
+                {eventImage ? (
+                  <img
+                    src={eventImage}
+                    alt="Portada"
+                    className="event-image-preview"
+                  />
+                ) : (
+                  <span>📷 Subir imagen de portada</span>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleEventImage}
+                  style={{ display: "none" }}
+                />
+              </label>
+
+              <label className="event-field-label">Inicio</label>
               <input
                 type="datetime-local"
                 value={eventDate}
                 onChange={(e) => setEventDate(e.target.value)}
+              />
+
+              <label className="event-field-label">Fin</label>
+              <input
+                type="datetime-local"
+                value={eventEndDate}
+                onChange={(e) => setEventEndDate(e.target.value)}
               />
 
               <div className="event-actions">

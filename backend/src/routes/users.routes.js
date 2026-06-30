@@ -20,23 +20,24 @@ router.get("/", async (req, res) => {
 
 router.post("/register", async (req, res) => {
   try {
-    const { username, email, password, city, address } = req.body;
+    const { username, name, email, password, city, address } = req.body;
 
     const result = await pool.query(
       `
       INSERT INTO users (
         username,
+        name,
         email,
         password,
         city,
         address
       )
 
-      VALUES ($1, $2, $3, $4, $5)
+      VALUES ($1, $2, $3, $4, $5, $6)
 
       RETURNING *;
       `,
-      [username, email, password, city, address],
+      [username, name, email, password, city, address],
     );
 
     res.status(201).json({
@@ -195,16 +196,16 @@ router.put("/:id/interests", async (req, res) => {
 router.put("/:id/profile", async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, avatar_url } = req.body;
+    const { name, avatar_url, address, email, city } = req.body;
 
     const result = await pool.query(
       `
       UPDATE users
-      SET name = $1, avatar_url = $2
-      WHERE id = $3
+      SET name = $1, avatar_url = $2, address = $3, email = $4, city = $5
+      WHERE id = $6
       RETURNING *
       `,
-      [name, avatar_url, id],
+      [name, avatar_url, address, email, city, id],
     );
 
     res.json(result.rows[0]);

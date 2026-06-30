@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import "../styles/events.css";
 import API_URL from "../config/api";
+import { googleCalendarUrl } from "../config/googleCalendar";
 
 function Events() {
   const [events, setEvents] = useState([]);
@@ -249,7 +250,14 @@ function Events() {
       <div className="events-list">
         {filteredEvents.map((event) => (
           <div key={event.id} className="event-card">
-            <div className="event-image"></div>
+            <div
+              className="event-image"
+              style={
+                event.image_url
+                  ? { backgroundImage: `url(${event.image_url})` }
+                  : {}
+              }
+            ></div>
 
             <div className="event-info">
               <h2>{event.title}</h2>
@@ -288,6 +296,15 @@ function Events() {
                   Asistiré
                 </button>
               )}
+
+              <a
+                className="calendar-button"
+                href={googleCalendarUrl(event)}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                📅 Agregar a Google Calendar
+              </a>
             </div>
           </div>
         ))}

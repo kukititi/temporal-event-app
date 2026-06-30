@@ -8,6 +8,8 @@ import API_URL from "../config/api";
 function Register() {
   const [username, setUsername] = useState("");
 
+  const [name, setName] = useState("");
+
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
@@ -29,6 +31,7 @@ function Register() {
 
         body: JSON.stringify({
           username,
+          name,
           email,
           password,
           city,
@@ -41,10 +44,7 @@ function Register() {
       console.log(data);
 
       if (response.ok) {
-        // Auto-login: guardamos el usuario recién creado...
         localStorage.setItem("user", JSON.stringify(data.user));
-
-        // ...y lo llevamos a elegir sus intereses.
         window.location.href = "/intereses";
       } else {
         alert(data.message);
@@ -75,9 +75,16 @@ function Register() {
         <form className="auth-form" onSubmit={handleRegister}>
           <input
             type="text"
-            placeholder="Nombre de usuario"
+            placeholder="Nombre de usuario (@usuario)"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
+          />
+
+          <input
+            type="text"
+            placeholder="Tu nombre"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
 
           <input

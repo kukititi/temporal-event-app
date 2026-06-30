@@ -128,6 +128,8 @@ router.post("/", async (req, res) => {
       location,
       address,
       event_date,
+      end_date,
+      image_url,
       created_by,
     } = req.body;
 
@@ -140,12 +142,24 @@ router.post("/", async (req, res) => {
         location,
         address,
         event_date,
+        end_date,
+        image_url,
         created_by
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
       `,
-      [title, description, category, location, address, event_date, created_by],
+      [
+        title,
+        description,
+        category,
+        location,
+        address,
+        event_date,
+        end_date,
+        image_url,
+        created_by,
+      ],
     );
 
     res.status(201).json(result.rows[0]);
@@ -218,8 +232,16 @@ router.put("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { title, description, category, location, address, event_date } =
-      req.body;
+    const {
+      title,
+      description,
+      category,
+      location,
+      address,
+      event_date,
+      end_date,
+      image_url,
+    } = req.body;
 
     const result = await pool.query(
       `
@@ -230,11 +252,23 @@ router.put("/:id", async (req, res) => {
         category = $3,
         location = $4,
         address = $5,
-        event_date = $6
-      WHERE id = $7
+        event_date = $6,
+        end_date = $7,
+        image_url = $8
+      WHERE id = $9
       RETURNING *
       `,
-      [title, description, category, location, address, event_date, id],
+      [
+        title,
+        description,
+        category,
+        location,
+        address,
+        event_date,
+        end_date,
+        image_url,
+        id,
+      ],
     );
 
     res.json(result.rows[0]);
