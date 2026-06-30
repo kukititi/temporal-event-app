@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import "../styles/profile.css";
 import API_URL from "../config/api";
 
@@ -34,8 +36,11 @@ function Profile() {
 
   const [eventAddress, setEventAddress] = useState("");
 
-  const [eventDate, setEventDate] = useState("");
-  const [eventEndDate, setEventEndDate] = useState("");
+const [eventStartDate, setEventStartDate] = useState(null);
+const [eventStartTime, setEventStartTime] = useState("");
+
+const [eventEndDate, setEventEndDate] = useState(null);
+const [eventEndTime, setEventEndTime] = useState("");
   const [eventImage, setEventImage] = useState("");
 
   const [editingEventId, setEditingEventId] = useState(null);
@@ -132,8 +137,8 @@ function Profile() {
     setEventCategory("");
     setEventLocation("");
     setEventAddress("");
-    setEventDate("");
-    setEventEndDate("");
+    setEventDate(null);
+    setEventEndDate(null);
     setEventImage("");
   }
 
@@ -184,8 +189,13 @@ function Profile() {
           category: eventCategory,
           location: eventLocation,
           address: eventAddress,
-          event_date: eventDate,
-          end_date: eventEndDate,
+          event_date: eventDate
+              ? eventDate.toISOString()
+              : null,
+
+          end_date: eventEndDate
+              ? eventEndDate.toISOString()
+              : null,
           image_url: eventImage,
           created_by: user.id,
         }),
@@ -220,8 +230,13 @@ function Profile() {
           category: eventCategory,
           location: eventLocation,
           address: eventAddress,
-          event_date: eventDate,
-          end_date: eventEndDate,
+          event_date: eventDate
+              ? eventDate.toISOString()
+              : null,
+                  
+          end_date: eventEndDate
+              ? eventEndDate.toISOString()
+              : null,
           image_url: eventImage,
         }),
       });
@@ -273,11 +288,16 @@ function Profile() {
     setEventLocation(event.location || "");
     setEventAddress(event.address || "");
 
-    if (event.event_date) {
-      setEventDate(event.event_date.slice(0, 16));
-    }
+if (event.event_date) {
+    setEventDate(new Date(event.event_date));
+}
 
-    setEventEndDate(event.end_date ? event.end_date.slice(0, 16) : "");
+  setEventEndDate(
+    event.end_date
+        ? new Date(event.end_date)
+        : null
+);
+
     setEventImage(event.image_url || "");
 
     setShowCreateEvent(true);
@@ -729,19 +749,67 @@ function Profile() {
                 />
               </label>
 
-              <label className="event-field-label">Inicio</label>
-              <input
-                type="datetime-local"
-                value={eventDate}
-                onChange={(e) => setEventDate(e.target.value)}
-              />
+              <div className="event-date-group">
 
-              <label className="event-field-label">Fin</label>
-              <input
-                type="datetime-local"
-                value={eventEndDate}
-                onChange={(e) => setEventEndDate(e.target.value)}
-              />
+    <label className="event-field-label">
+        Fecha de inicio
+    </label>
+
+    <DatePicker
+        selected={eventStartDate}
+        onChange={(date) => setEventStartDate(date)}
+        dateFormat="dd/MM/yyyy"
+        placeholderText="Selecciona una fecha"
+        className="date-picker"
+    />
+
+</div>
+
+<div className="event-date-group">
+
+    <label className="event-field-label">
+        Hora de inicio
+    </label>
+
+    <input
+        type="time"
+        value={eventStartTime}
+        onChange={(e)=>setEventStartTime(e.target.value)}
+        className="date-picker"
+    />
+
+</div>
+
+<div className="event-date-group">
+
+    <label className="event-field-label">
+        Fecha de finalización
+    </label>
+
+    <DatePicker
+        selected={eventEndDate}
+        onChange={(date) => setEventEndDate(date)}
+        dateFormat="dd/MM/yyyy"
+        placeholderText="Selecciona una fecha"
+        className="date-picker"
+    />
+
+</div>
+
+<div className="event-date-group">
+
+    <label className="event-field-label">
+        Hora de finalización
+    </label>
+
+    <input
+        type="time"
+        value={eventEndTime}
+        onChange={(e)=>setEventEndTime(e.target.value)}
+        className="date-picker"
+    />
+
+</div>
 
               <div className="event-actions">
                 <button
