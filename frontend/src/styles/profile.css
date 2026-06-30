@@ -406,3 +406,22 @@
 
   font-weight: bold;
 }
+/* ============================================================
+   AGREGAR AL FINAL DE profile.css
+   Formulario de edición de perfil (nombre + imagen)
+   ============================================================ */
+.profile-edit-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  max-width: 320px;
+
+  margin: 10px auto;
+}
+
+.profile-edit-form .address-input {
+  max-width: 100%;
+}

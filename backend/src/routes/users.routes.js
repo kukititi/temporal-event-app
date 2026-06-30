@@ -192,6 +192,28 @@ router.put("/:id/interests", async (req, res) => {
   }
 });
 
+router.put("/:id/profile", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, avatar_url } = req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE users
+      SET name = $1, avatar_url = $2
+      WHERE id = $3
+      RETURNING *
+      `,
+      [name, avatar_url, id],
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error actualizando perfil" });
+  }
+});
+
 router.get("/:id/favorites", async (req, res) => {
   try {
     const { id } = req.params;

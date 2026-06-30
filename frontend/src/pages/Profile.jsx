@@ -13,6 +13,11 @@ function Profile() {
 
   const [editingAddress, setEditingAddress] = useState(false);
 
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [newName, setNewName] = useState(user?.name || "");
+  const [newAvatar, setNewAvatar] = useState(user?.avatar_url || "");
+  const [showAllInterests, setShowAllInterests] = useState(false);
+
   const [newAddress, setNewAddress] = useState(user?.address || "");
 
   const [showCreateEvent, setShowCreateEvent] = useState(false);
@@ -316,18 +321,82 @@ function Profile() {
     loadData();
   }, []);
 
+  async function updateProfile() {
+    try {
+      const response = await fetch(`${API_URL}/users/${user.id}/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName, avatar_url: newAvatar }),
+      });
+
+      if (!response.ok) {
+        alert("No se pudo actualizar el perfil (codigo " + response.status + ").");
+        return;
+      }
+
+      const updatedUser = await response.json();
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setEditingProfile(false);
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+      alert("Error de conexion al actualizar el perfil.");
+    }
+  }
+
   return (
     <div className="profile-container">
       <div className="profile-header">
         <img
-          src="https://cdn-icons-png.flaticon.com/512/847/847969.png"
+          src={
+            user?.avatar_url ||
+            "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+          }
           alt="Perfil"
           className="profile-image"
         />
 
         <h2>@{user?.username || "Usuario"}</h2>
 
-        <h3>{user?.username || "Sin nombre"}</h3>
+        {editingProfile ? (
+          <div className="profile-edit-form">
+            <input
+              className="address-input"
+              type="text"
+              placeholder="Tu nombre"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <input
+              className="address-input"
+              type="text"
+              placeholder="URL de tu imagen de perfil"
+              value={newAvatar}
+              onChange={(e) => setNewAvatar(e.target.value)}
+            />
+            <div className="event-actions">
+              <button className="save-button" onClick={updateProfile}>
+                Guardar perfil
+              </button>
+              <button
+                className="address-edit-button"
+                onClick={() => setEditingProfile(false)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h3>{user?.name || user?.username || "Sin nombre"}</h3>
+            <button
+              className="address-edit-button"
+              onClick={() => setEditingProfile(true)}
+            >
+              ✏️ Editar perfil
+            </button>
+          </>
+        )}
 
         <p>{user?.email || "Sin correo"}</p>
 
@@ -367,13 +436,27 @@ function Profile() {
           {interests.length === 0 ? (
             <p>Aún no has elegido intereses.</p>
           ) : (
-            interests.map((interest, index) => (
-              <div key={index} className="interest-tag">
-                {interest}
-              </div>
-            ))
+            (showAllInterests ? interests : interests.slice(0, 6)).map(
+              (interest, index) => (
+                <div key={index} className="interest-tag">
+                  {interest}
+                </div>
+              ),
+            )
           )}
         </div>
+
+        {interests.length > 6 && (
+          <button
+            className="address-edit-button"
+            onClick={() => setShowAllInterests(!showAllInterests)}
+            style={{ marginTop: "10px" }}
+          >
+            {showAllInterests
+              ? "Mostrar menos"
+              : `Mostrar más (${interests.length - 6} más)`}
+          </button>
+        )}
 
         <a
           className="address-edit-button"
