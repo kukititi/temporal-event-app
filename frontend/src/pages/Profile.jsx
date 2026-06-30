@@ -3,6 +3,13 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/profile.css";
 import API_URL from "../config/api";
+import EventDetailModal from "../components/EventDetailModal";
+import {
+  combineDateTime,
+  toTimeString,
+  hasEnded,
+  formatEventRange,
+} from "../config/dateUtils";
 
 function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -36,11 +43,11 @@ function Profile() {
 
   const [eventAddress, setEventAddress] = useState("");
 
-const [eventStartDate, setEventStartDate] = useState(null);
-const [eventStartTime, setEventStartTime] = useState("");
+  const [eventStartDate, setEventStartDate] = useState(null);
+  const [eventStartTime, setEventStartTime] = useState("");
 
-const [eventEndDate, setEventEndDate] = useState(null);
-const [eventEndTime, setEventEndTime] = useState("");
+  const [eventEndDate, setEventEndDate] = useState(null);
+  const [eventEndTime, setEventEndTime] = useState("");
   const [eventImage, setEventImage] = useState("");
 
   const [editingEventId, setEditingEventId] = useState(null);
@@ -62,6 +69,9 @@ const [eventEndTime, setEventEndTime] = useState("");
   const [showFavorites, setShowFavorites] = useState(false);
 
   const [eventAttendeesCount, setEventAttendeesCount] = useState({});
+
+  // Evento abierto en el modal de detalle / estadísticas post-evento
+  const [detailEvent, setDetailEvent] = useState(null);
 
   async function fetchAttendedEvents() {
     try {
@@ -137,8 +147,10 @@ const [eventEndTime, setEventEndTime] = useState("");
     setEventCategory("");
     setEventLocation("");
     setEventAddress("");
-    setEventDate(null);
+    setEventStartDate(null);
+    setEventStartTime("");
     setEventEndDate(null);
+    setEventEndTime("");
     setEventImage("");
   }
 
@@ -169,14 +181,19 @@ const [eventEndTime, setEventEndTime] = useState("");
   }
 
   async function createEvent() {
-    if (!eventDate || !eventEndDate) {
-      alert("Debes indicar fecha/hora de inicio y de fin.");
+    // Unimos fecha (DatePicker) + hora ("HH:MM") en un solo datetime
+    const start = combineDateTime(eventStartDate, eventStartTime);
+    const end = combineDateTime(eventEndDate, eventEndTime);
+
+    if (!start || !end) {
+      alert("Debes indicar fecha y hora de inicio y de fin.");
       return;
     }
-    if (new Date(eventEndDate) <= new Date(eventDate)) {
-      alert("La hora de fin debe ser posterior a la de inicio.");
+    if (end <= start) {
+      alert("La fecha/hora de fin debe ser posterior a la de inicio.");
       return;
     }
+
     try {
       const response = await fetch(`${API_URL}/events`, {
         method: "POST",
@@ -189,13 +206,8 @@ const [eventEndTime, setEventEndTime] = useState("");
           category: eventCategory,
           location: eventLocation,
           address: eventAddress,
-          event_date: eventDate
-              ? eventDate.toISOString()
-              : null,
-
-          end_date: eventEndDate
-              ? eventEndDate.toISOString()
-              : null,
+          event_date: start.toISOString(),
+          end_date: end.toISOString(),
           image_url: eventImage,
           created_by: user.id,
         }),
@@ -203,7 +215,8 @@ const [eventEndTime, setEventEndTime] = useState("");
 
       const data = await response.json();
 
-      console.log(data);
+      // Lo mostramos al instante en "Eventos Creados" (sin recargar)
+      setMyEvents((prev) => [data, ...prev]);
 
       alert("Evento creado 🚀");
 
@@ -216,6 +229,18 @@ const [eventEndTime, setEventEndTime] = useState("");
   }
 
   async function updateEvent() {
+    const start = combineDateTime(eventStartDate, eventStartTime);
+    const end = combineDateTime(eventEndDate, eventEndTime);
+
+    if (!start || !end) {
+      alert("Debes indicar fecha y hora de inicio y de fin.");
+      return;
+    }
+    if (end <= start) {
+      alert("La fecha/hora de fin debe ser posterior a la de inicio.");
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/events/${editingEventId}`, {
         method: "PUT",
@@ -230,13 +255,8 @@ const [eventEndTime, setEventEndTime] = useState("");
           category: eventCategory,
           location: eventLocation,
           address: eventAddress,
-          event_date: eventDate
-              ? eventDate.toISOString()
-              : null,
-                  
-          end_date: eventEndDate
-              ? eventEndDate.toISOString()
-              : null,
+          event_date: start.toISOString(),
+          end_date: end.toISOString(),
           image_url: eventImage,
         }),
       });
@@ -288,15 +308,12 @@ const [eventEndTime, setEventEndTime] = useState("");
     setEventLocation(event.location || "");
     setEventAddress(event.address || "");
 
-if (event.event_date) {
-    setEventDate(new Date(event.event_date));
-}
+    // Precargamos fecha y hora separadas a partir del datetime guardado
+    setEventStartDate(event.event_date ? new Date(event.event_date) : null);
+    setEventStartTime(toTimeString(event.event_date));
 
-  setEventEndDate(
-    event.end_date
-        ? new Date(event.end_date)
-        : null
-);
+    setEventEndDate(event.end_date ? new Date(event.end_date) : null);
+    setEventEndTime(toTimeString(event.end_date));
 
     setEventImage(event.image_url || "");
 
@@ -636,6 +653,13 @@ if (event.event_date) {
                   <p>{event.category}</p>
 
                   <small>📍 {event.location}</small>
+
+                  <button
+                    className="attendees-button"
+                    onClick={() => setDetailEvent(event)}
+                  >
+                    🔍 Ver y calificar
+                  </button>
                 </div>
               ))
             )}
@@ -662,6 +686,13 @@ if (event.event_date) {
                   <p>{event.category}</p>
 
                   <small>📍 {event.location}</small>
+
+                  <button
+                    className="attendees-button"
+                    onClick={() => setDetailEvent(event)}
+                  >
+                    🔍 Ver y calificar
+                  </button>
                 </div>
               ))
             )}
@@ -750,66 +781,54 @@ if (event.event_date) {
               </label>
 
               <div className="event-date-group">
+                <label className="event-field-label">Fecha de inicio</label>
 
-    <label className="event-field-label">
-        Fecha de inicio
-    </label>
+                <DatePicker
+                  selected={eventStartDate}
+                  onChange={(date) => setEventStartDate(date)}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Selecciona una fecha"
+                  className="date-picker"
+                />
+              </div>
 
-    <DatePicker
-        selected={eventStartDate}
-        onChange={(date) => setEventStartDate(date)}
-        dateFormat="dd/MM/yyyy"
-        placeholderText="Selecciona una fecha"
-        className="date-picker"
-    />
+              <div className="event-date-group">
+                <label className="event-field-label">Hora de inicio</label>
 
-</div>
+                <input
+                  type="time"
+                  value={eventStartTime}
+                  onChange={(e) => setEventStartTime(e.target.value)}
+                  className="date-picker"
+                />
+              </div>
 
-<div className="event-date-group">
+              <div className="event-date-group">
+                <label className="event-field-label">
+                  Fecha de finalización
+                </label>
 
-    <label className="event-field-label">
-        Hora de inicio
-    </label>
+                <DatePicker
+                  selected={eventEndDate}
+                  onChange={(date) => setEventEndDate(date)}
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Selecciona una fecha"
+                  className="date-picker"
+                />
+              </div>
 
-    <input
-        type="time"
-        value={eventStartTime}
-        onChange={(e)=>setEventStartTime(e.target.value)}
-        className="date-picker"
-    />
+              <div className="event-date-group">
+                <label className="event-field-label">
+                  Hora de finalización
+                </label>
 
-</div>
-
-<div className="event-date-group">
-
-    <label className="event-field-label">
-        Fecha de finalización
-    </label>
-
-    <DatePicker
-        selected={eventEndDate}
-        onChange={(date) => setEventEndDate(date)}
-        dateFormat="dd/MM/yyyy"
-        placeholderText="Selecciona una fecha"
-        className="date-picker"
-    />
-
-</div>
-
-<div className="event-date-group">
-
-    <label className="event-field-label">
-        Hora de finalización
-    </label>
-
-    <input
-        type="time"
-        value={eventEndTime}
-        onChange={(e)=>setEventEndTime(e.target.value)}
-        className="date-picker"
-    />
-
-</div>
+                <input
+                  type="time"
+                  value={eventEndTime}
+                  onChange={(e) => setEventEndTime(e.target.value)}
+                  className="date-picker"
+                />
+              </div>
 
               <div className="event-actions">
                 <button
@@ -865,7 +884,12 @@ if (event.event_date) {
                 ) : (
                   myEvents.map((event) => (
                     <div key={event.id} className="event-card">
-                      <h3>{event.title}</h3>
+                      <h3>
+                        {event.title}{" "}
+                        {hasEnded(event) && (
+                          <span className="badge-ended">Finalizado</span>
+                        )}
+                      </h3>
 
                       <p>{event.category}</p>
 
@@ -875,15 +899,24 @@ if (event.event_date) {
                         👥 {eventAttendeesCount[event.id] || 0} asistentes
                       </p>
 
-                      <small>
-                        {new Date(event.event_date).toLocaleDateString()}
-                      </small>
+                      <small>{formatEventRange(event)}</small>
+
                       <button
                         className="attendees-button"
                         onClick={() => fetchAttendeesForEvent(event.id)}
                       >
                         👥 Ver asistentes
                       </button>
+
+                      <button
+                        className="attendees-button"
+                        onClick={() => setDetailEvent(event)}
+                      >
+                        {hasEnded(event)
+                          ? "📊 Estadísticas post-evento"
+                          : "🔍 Ver detalles"}
+                      </button>
+
                       {openAttendeesEvent === event.id && (
                         <div className="attendees-list">
                           <h4>Asistentes</h4>
@@ -925,6 +958,13 @@ if (event.event_date) {
           </div>
         </div>
       )}
+
+      {/* Modal de detalle / estadísticas post-evento */}
+      <EventDetailModal
+        event={detailEvent}
+        user={user}
+        onClose={() => setDetailEvent(null)}
+      />
     </div>
   );
 }

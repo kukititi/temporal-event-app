@@ -3,8 +3,12 @@ import { useEffect, useState } from "react";
 import "../styles/events.css";
 import API_URL from "../config/api";
 import { googleCalendarUrl } from "../config/googleCalendar";
+import { formatEventRange, hasEnded } from "../config/dateUtils";
+import EventDetailModal from "../components/EventDetailModal";
 
 function Events() {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const [events, setEvents] = useState([]);
 
   const [search, setSearch] = useState("");
@@ -16,6 +20,11 @@ function Events() {
   const [attendingEvents, setAttendingEvents] = useState({});
 
   const [favoriteEvents, setFavoriteEvents] = useState({});
+
+  const [ratings, setRatings] = useState({});
+
+  // Evento abierto en el modal de detalle (null = cerrado)
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const filters = ["Todos", "Gaming", "Música", "Anime", "Tecnología"];
 
@@ -37,14 +46,13 @@ function Events() {
 
       const data = await response.json();
 
-      console.log(data);
-
       setEvents(data);
 
       data.forEach((event) => {
         fetchAttendees(event.id);
         checkAttendance(event.id);
         checkFavorite(event.id);
+        fetchRating(event.id);
       });
     } catch (error) {
       console.log(error);
@@ -68,10 +76,23 @@ function Events() {
     }
   }
 
+  async function fetchRating(eventId) {
+    try {
+      const response = await fetch(`${API_URL}/events/${eventId}/rating`);
+
+      const data = await response.json();
+
+      setRatings((prev) => ({
+        ...prev,
+        [eventId]: data,
+      }));
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   async function checkAttendance(eventId) {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-
       if (!user) return;
 
       const response = await fetch(
@@ -91,8 +112,6 @@ function Events() {
 
   async function checkFavorite(eventId) {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-
       if (!user) return;
 
       const response = await fetch(
@@ -112,8 +131,6 @@ function Events() {
 
   async function attendEvent(eventId) {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-
       if (!user) {
         alert("Debes iniciar sesión");
         return;
@@ -135,8 +152,6 @@ function Events() {
         ...prev,
         [eventId]: true,
       }));
-
-      alert("Asistencia registrada");
     } catch (error) {
       console.log(error);
     }
@@ -144,7 +159,7 @@ function Events() {
 
   async function cancelAttendance(eventId) {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user) return;
 
       await fetch(`${API_URL}/events/${eventId}/attend`, {
         method: "DELETE",
@@ -169,8 +184,6 @@ function Events() {
 
   async function toggleFavorite(eventId) {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
-
       if (!user) return;
 
       if (favoriteEvents[eventId]) {
@@ -205,11 +218,7 @@ function Events() {
   }
 
   useEffect(() => {
-    const loadEvents = async () => {
-      await fetchEvents();
-    };
-
-    loadEvents();
+    fetchEvents();
   }, []);
 
   return (
@@ -239,6 +248,7 @@ function Events() {
           </button>
         ))}
       </div>
+
       <div className="sort-container">
         <button className="sort-button">📍 Cercanos</button>
 
@@ -248,67 +258,115 @@ function Events() {
       </div>
 
       <div className="events-list">
-        {filteredEvents.map((event) => (
-          <div key={event.id} className="event-card">
-            <div
-              className="event-image"
-              style={
-                event.image_url
-                  ? { backgroundImage: `url(${event.image_url})` }
-                  : {}
-              }
-            ></div>
+        {filteredEvents.length === 0 ? (
+          <p className="events-empty">No se encontraron eventos.</p>
+        ) : (
+          filteredEvents.map((event) => {
+            const ended = hasEnded(event);
+            const rating = ratings[event.id];
 
-            <div className="event-info">
-              <h2>{event.title}</h2>
-
-              <p>{event.category}</p>
-
-              <span>{event.location}</span>
-
-              <div className="event-address">📍 {event.address}</div>
-
-              <small>{event.distance}</small>
-
-              <p className="attendees-count">
-                👥 {attendees[event.id] || 0} asistentes
-              </p>
-
-              <button
-                className="favorite-button"
-                onClick={() => toggleFavorite(event.id)}
-              >
-                {favoriteEvents[event.id] ? "💖 Guardado" : "🤍 Guardar"}
-              </button>
-
-              {attendingEvents[event.id] ? (
-                <button
-                  className="attend-button attending"
-                  onClick={() => cancelAttendance(event.id)}
+            return (
+              <div key={event.id} className="event-card">
+                <div
+                  className="event-image"
+                  style={
+                    event.image_url
+                      ? { backgroundImage: `url(${event.image_url})` }
+                      : {}
+                  }
                 >
-                  ✓ Asistirás
-                </button>
-              ) : (
-                <button
-                  className="attend-button"
-                  onClick={() => attendEvent(event.id)}
-                >
-                  Asistiré
-                </button>
-              )}
+                  {ended && <span className="badge-ended">Finalizado</span>}
+                </div>
 
-              <a
-                className="calendar-button"
-                href={googleCalendarUrl(event)}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                📅 Agregar a Google Calendar
-              </a>
-            </div>
-          </div>
-        ))}
+                <div className="event-info">
+                  <div className="event-info-head">
+                    <h2>{event.title}</h2>
+                    {event.category && (
+                      <span className="event-badge">{event.category}</span>
+                    )}
+                  </div>
+
+                  {rating && rating.count > 0 && (
+                    <p className="event-rating-line">
+                      ⭐ {Number(rating.average).toFixed(1)} ({rating.count})
+                    </p>
+                  )}
+
+                  {event.description && (
+                    <p className="event-description">{event.description}</p>
+                  )}
+
+                  <p className="event-date-line">
+                    🗓️ {formatEventRange(event)}
+                  </p>
+
+                  {event.location && (
+                    <span className="event-location">🏷️ {event.location}</span>
+                  )}
+
+                  {event.address && (
+                    <div className="event-address">📍 {event.address}</div>
+                  )}
+
+                  <p className="attendees-count">
+                    👥 {attendees[event.id] || 0} asistentes
+                  </p>
+
+                  <button
+                    className="details-button"
+                    onClick={() => setSelectedEvent(event)}
+                  >
+                    🔍 Ver detalles y calificar
+                  </button>
+
+                  <button
+                    className="favorite-button"
+                    onClick={() => toggleFavorite(event.id)}
+                  >
+                    {favoriteEvents[event.id] ? "💖 Guardado" : "🤍 Guardar"}
+                  </button>
+
+                  {attendingEvents[event.id] ? (
+                    <button
+                      className="attend-button attending"
+                      onClick={() => cancelAttendance(event.id)}
+                    >
+                      ✓ Asistirás
+                    </button>
+                  ) : (
+                    <button
+                      className="attend-button"
+                      onClick={() => attendEvent(event.id)}
+                    >
+                      Asistiré
+                    </button>
+                  )}
+
+                  <a
+                    className="calendar-button"
+                    href={googleCalendarUrl(event)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    📅 Agregar a Google Calendar
+                  </a>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
+
+      {/* Modal de detalle: ver descripción completa, calificar y comentar */}
+      <EventDetailModal
+        event={selectedEvent}
+        user={user}
+        onClose={() => {
+          setSelectedEvent(null);
+          // refrescamos la calificación de la tarjeta al cerrar
+          if (selectedEvent) fetchRating(selectedEvent.id);
+        }}
+      />
     </div>
   );
 }

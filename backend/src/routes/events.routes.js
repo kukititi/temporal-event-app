@@ -200,6 +200,17 @@ router.delete("/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Borramos primero las dependencias para no violar llaves foráneas.
+    // (event_reviews igual tiene ON DELETE CASCADE, pero lo dejamos
+    //  explícito por si la tabla se creó sin el cascade.)
+    await pool.query(
+      `
+      DELETE FROM event_reviews
+      WHERE event_id = $1
+      `,
+      [id],
+    );
+
     await pool.query(
       `
       DELETE FROM event_attendees
@@ -440,6 +451,210 @@ router.get("/:id/is-favorite/:userId", async (req, res) => {
 
     res.status(500).json({
       message: "Error verificando favorito",
+    });
+  }
+});
+
+// ============================================================
+//  RESEÑAS DE EVENTOS  (calificar + comentar)  — Ronda 2
+//  Requiere la tabla event_reviews (ver backend/event_reviews.sql)
+// ============================================================
+
+// Listar las reseñas de un evento (con datos del autor)
+router.get("/:id/reviews", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT
+        r.id,
+        r.rating,
+        r.comment,
+        r.created_at,
+        r.user_id,
+        u.username,
+        u.avatar_url
+      FROM event_reviews r
+      JOIN users u ON u.id = r.user_id
+      WHERE r.event_id = $1
+      ORDER BY r.created_at DESC
+      `,
+      [id],
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo reseñas",
+    });
+  }
+});
+
+// Promedio + cantidad de calificaciones de un evento
+router.get("/:id/rating", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT
+        COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average,
+        COUNT(*) AS count
+      FROM event_reviews
+      WHERE event_id = $1
+      `,
+      [id],
+    );
+
+    res.json({
+      average: Number(result.rows[0].average),
+      count: Number(result.rows[0].count),
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo calificación",
+    });
+  }
+});
+
+// Crear o actualizar la reseña del usuario (una sola por usuario/evento)
+router.post("/:id/reviews", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { user_id, rating, comment } = req.body;
+
+    if (!user_id || !rating) {
+      return res.status(400).json({
+        message: "Faltan datos: se requiere user_id y rating",
+      });
+    }
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({
+        message: "La calificación debe estar entre 1 y 5",
+      });
+    }
+
+    const result = await pool.query(
+      `
+      INSERT INTO event_reviews (event_id, user_id, rating, comment)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (event_id, user_id)
+      DO UPDATE SET
+        rating = EXCLUDED.rating,
+        comment = EXCLUDED.comment,
+        created_at = NOW()
+      RETURNING *
+      `,
+      [id, user_id, rating, comment || ""],
+    );
+
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error guardando la reseña",
+    });
+  }
+});
+
+// Eliminar la reseña propia
+router.delete("/:id/reviews/:userId", async (req, res) => {
+  try {
+    const { id, userId } = req.params;
+
+    await pool.query(
+      `
+      DELETE FROM event_reviews
+      WHERE event_id = $1
+      AND user_id = $2
+      `,
+      [id, userId],
+    );
+
+    res.json({
+      message: "Reseña eliminada",
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error eliminando la reseña",
+    });
+  }
+});
+
+// Estadísticas POST-EVENTO de un evento puntual (para el organizador):
+// asistentes, calificación promedio y total de reseñas.
+router.get("/:id/event-stats", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const attendeesResult = await pool.query(
+      `
+      SELECT COUNT(*) AS attendees
+      FROM event_attendees
+      WHERE event_id = $1
+      `,
+      [id],
+    );
+
+    const ratingResult = await pool.query(
+      `
+      SELECT
+        COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average,
+        COUNT(*) AS total_reviews
+      FROM event_reviews
+      WHERE event_id = $1
+      `,
+      [id],
+    );
+
+    res.json({
+      attendees: Number(attendeesResult.rows[0].attendees),
+      averageRating: Number(ratingResult.rows[0].average),
+      totalReviews: Number(ratingResult.rows[0].total_reviews),
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo estadísticas del evento",
+    });
+  }
+});
+
+// Obtener UN evento por id (datos frescos para la vista de detalle).
+// IMPORTANTE: va al final, porque "/:id" es muy genérico y si se pone
+// arriba podría tapar rutas más específicas como "/:id/reviews".
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(
+      `
+      SELECT * FROM events
+      WHERE id = $1
+      `,
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Evento no encontrado" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Error obteniendo el evento",
     });
   }
 });
