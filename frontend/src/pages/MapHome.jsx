@@ -1,11 +1,18 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import EventMap from "../components/EventMap";
 import EventDetailModal from "../components/EventDetailModal";
 import "../styles/mapHome.css";
 import API_URL from "../config/api";
-import { formatEventRange } from "../config/dateUtils";
+import { formatEventRange, eventStatus, statusLabel } from "../config/dateUtils";
+import {
+  checkNotifPermission,
+  requestNotifPermission,
+  sendLocalNotification,
+} from "../config/notify";
 
-const SANTIAGO = { lat: -33.4489, lng: -70.6693 };
+// Ubicación por defecto: Av. Ejército Libertador 441, Santiago.
+// Es a lo que caemos si el navegador no entrega la geolocalización.
+const DEFAULT_LOCATION = { lat: -33.45249721842194, lng: -70.66111896424796 };
 
 // Distancia en km entre dos puntos (fórmula de Haversine).
 function distanceKm(a, b) {
@@ -32,6 +39,11 @@ function MapHome() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [recenterSignal, setRecenterSignal] = useState(0);
 
+  // Notificaciones
+  const [showBanner, setShowBanner] = useState(true);
+  const [notifPermission, setNotifPermission] = useState("prompt");
+  const notifiedRef = useRef(new Set());
+
   async function fetchEvents() {
     try {
       const response = await fetch(`${API_URL}/events`);
@@ -46,10 +58,15 @@ function MapHome() {
     fetchEvents();
   }, []);
 
-  // Pide la ubicación del usuario; si la rechaza, cae a Santiago.
+  // Estado inicial del permiso de notificaciones.
+  useEffect(() => {
+    checkNotifPermission().then(setNotifPermission);
+  }, []);
+
+  // Pide la ubicación del usuario; si la rechaza, cae a Av. Ejército 441.
   function locateUser(recenter = false) {
     if (!navigator.geolocation) {
-      setUserLocation(SANTIAGO);
+      setUserLocation(DEFAULT_LOCATION);
       return;
     }
     navigator.geolocation.getCurrentPosition(
@@ -60,7 +77,7 @@ function MapHome() {
         });
         if (recenter) setRecenterSignal((s) => s + 1);
       },
-      () => setUserLocation((prev) => prev || SANTIAGO),
+      () => setUserLocation((prev) => prev || DEFAULT_LOCATION),
       { enableHighAccuracy: true, timeout: 8000 },
     );
   }
@@ -68,6 +85,27 @@ function MapHome() {
   useEffect(() => {
     locateUser(false);
   }, []);
+
+  // Botón "Centrar en mí": recentra YA a la ubicación conocida (aunque la
+  // geolocalización falle o tarde) y, en paralelo, intenta actualizarla.
+  function centerOnMe() {
+    setUserLocation((prev) => prev || DEFAULT_LOCATION);
+    setRecenterSignal((s) => s + 1);
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude,
+          });
+          setRecenterSignal((s) => s + 1);
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000 },
+      );
+    }
+  }
 
   // Filtro de texto (título, categoría, ubicación).
   const searched = useMemo(() => {
@@ -100,8 +138,66 @@ function MapHome() {
     (e) => e.latitude == null || e.longitude == null,
   ).length;
 
+  // Pide permiso para notificaciones (nativo en el teléfono, web en dev).
+  function enableNotifications() {
+    requestNotifPermission().then((p) => {
+      setNotifPermission(p);
+      if (p === "unsupported") {
+        alert("Este dispositivo no soporta notificaciones.");
+      }
+    });
+  }
+
+  // Dispara una notificación cuando aparecen eventos nuevos dentro del
+  // radio (solo una vez por evento).
+  useEffect(() => {
+    if (notifPermission !== "granted") return;
+
+    const nuevos = nearby.filter((e) => !notifiedRef.current.has(e.id));
+    if (nuevos.length === 0) return;
+
+    nuevos.forEach((e) => notifiedRef.current.add(e.id));
+
+    const primero = nuevos[0];
+    const titulo =
+      nuevos.length === 1
+        ? "Evento cerca de ti"
+        : `${nuevos.length} eventos cerca de ti`;
+    const cuerpo =
+      nuevos.length === 1
+        ? `${primero.title} · a ${primero._dist.toFixed(1)} km`
+        : `El más cercano: ${primero.title} · a ${primero._dist.toFixed(1)} km`;
+
+    sendLocalNotification(titulo, cuerpo);
+  }, [nearby, notifPermission]);
+
   return (
     <div className="map-home-container">
+      {nearby.length > 0 && showBanner && (
+        <div className="nearby-banner">
+          <span className="nearby-banner-text">
+            📍 Hay {nearby.length} evento(s) dentro de {radiusKm} km de ti.
+          </span>
+
+          {(notifPermission === "prompt" || notifPermission === "denied") && (
+            <button className="banner-bell" onClick={enableNotifications}>
+              🔔 Avisarme
+            </button>
+          )}
+
+          {notifPermission === "granted" && (
+            <span className="banner-bell-on">🔔 Avisos activados</span>
+          )}
+
+          <button
+            className="banner-close"
+            onClick={() => setShowBanner(false)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div className="map-search-container">
         <input
           type="text"
@@ -118,7 +214,10 @@ function MapHome() {
           <button
             key={km}
             className={`radius-button ${radiusKm === km ? "active" : ""}`}
-            onClick={() => setRadiusKm(km)}
+            onClick={() => {
+              setRadiusKm(km);
+              setShowBanner(true);
+            }}
           >
             {km} km
           </button>
@@ -128,7 +227,7 @@ function MapHome() {
       <div className="map-area">
         <button
           className="locate-me-button"
-          onClick={() => locateUser(true)}
+          onClick={centerOnMe}
           title="Centrar en mi ubicación"
         >
           📍 Centrar en mí
@@ -171,6 +270,10 @@ function MapHome() {
                     {event._dist.toFixed(1)} km
                   </span>
                 </div>
+
+                <span className={`status-chip ${eventStatus(event)}`}>
+                  {statusLabel(event)}
+                </span>
 
                 <p className="nearby-meta">🗓️ {formatEventRange(event)}</p>
 

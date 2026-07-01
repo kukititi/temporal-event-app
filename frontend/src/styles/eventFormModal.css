@@ -54,21 +54,28 @@
   font-size: 1.25rem;
 }
 
-.event-form-close {
-  width: 36px;
-  height: 36px;
+/* Nota: profile.css tiene `.organizer-panel button { width:100% }`, que
+   estiraba esta X a todo el ancho. Subimos la especificidad para ganarle. */
+.event-form-modal .event-form-close {
+  flex: 0 0 auto;
+
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  padding: 0;
 
   border: none;
   border-radius: 50%;
 
-  background: var(--surface);
-  color: var(--text);
+  background: var(--accent-soft);
+  color: var(--accent-text);
 
   font-size: 1rem;
+  line-height: 1;
   cursor: pointer;
 }
 
-.event-form-close:hover {
+.event-form-modal .event-form-close:hover {
   background: var(--accent);
   color: var(--accent-contrast);
 }

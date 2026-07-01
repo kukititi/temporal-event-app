@@ -801,15 +801,8 @@ function Profile() {
                 onChange={(e) => setEventLocation(e.target.value)}
               />
 
-              <input
-                type="text"
-                placeholder="Dirección"
-                value={eventAddress}
-                onChange={(e) => setEventAddress(e.target.value)}
-              />
-
               <label className="event-field-label">
-                Ubicación en el mapa
+                Dirección
               </label>
               <EventMapPicker
                 key={editingEventId ?? "nuevo"}

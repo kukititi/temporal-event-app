@@ -396,3 +396,95 @@
     height: 150px;
   }
 }
+
+/* ============================================================
+   Banner de eventos cercanos (aviso dentro de la app)
+   ============================================================ */
+.nearby-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  margin-bottom: 18px;
+  padding: 14px 18px;
+
+  border-radius: 16px;
+
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+
+  color: var(--accent-text);
+}
+
+.nearby-banner-text {
+  flex: 1;
+  min-width: 180px;
+  font-weight: 600;
+}
+
+.banner-bell {
+  padding: 8px 14px;
+
+  border: none;
+  border-radius: 12px;
+
+  background: var(--accent);
+  color: var(--accent-contrast);
+
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.banner-bell:hover {
+  opacity: 0.9;
+}
+
+.banner-bell-on {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.banner-close {
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  color: var(--accent-text);
+
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.banner-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* Chip de estado en las tarjetas de eventos cercanos */
+.status-chip {
+  display: inline-block;
+  margin-bottom: 6px;
+
+  padding: 2px 10px;
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.status-chip.upcoming {
+  background: #2563eb;
+}
+
+.status-chip.ongoing {
+  background: #16a34a;
+}
+
+.status-chip.ended {
+  background: #64748b;
+}

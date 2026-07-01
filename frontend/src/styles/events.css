@@ -270,8 +270,8 @@
   border: none;
   border-radius: 12px;
 
-  background: var(--accent);
-  color: var(--accent-contrast);
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: #ffffff;
 
   cursor: pointer;
   font-weight: bold;
@@ -291,8 +291,8 @@
   border: none;
   border-radius: 8px;
 
-  background: var(--accent);
-  color: var(--accent-contrast);
+  background: #14b8a6;
+  color: #ffffff;
 
   cursor: pointer;
   font-weight: bold;
@@ -704,4 +704,40 @@
   .post-event-grid {
     flex-direction: column;
   }
+}
+/* ============================================================
+   Badges de estado del evento (Próximamente / En proceso / Finalizado)
+   ============================================================ */
+.status-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+
+  padding: 3px 10px;
+
+  border-radius: 999px;
+
+  font-size: 0.72rem;
+  font-weight: bold;
+
+  color: #ffffff;
+}
+
+.status-upcoming {
+  background: rgba(37, 99, 235, 0.92); /* azul */
+}
+
+.status-ongoing {
+  background: rgba(22, 163, 74, 0.92); /* verde */
+}
+
+.status-ended {
+  background: rgba(15, 23, 42, 0.85);
+  color: #fca5a5; /* gris con texto rojizo */
+}
+
+/* Etiqueta de orden activa (Cercanos / Tendencias / Recientes) */
+.sort-button.active-sort {
+  background: linear-gradient(135deg, #0f766e, #14b8a6);
+  color: #ffffff;
 }

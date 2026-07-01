@@ -1,10 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import "../styles/events.css";
 import API_URL from "../config/api";
 import { googleCalendarUrl } from "../config/googleCalendar";
-import { formatEventRange, hasEnded } from "../config/dateUtils";
+import {
+  formatEventRange,
+  eventStatus,
+  statusLabel,
+} from "../config/dateUtils";
 import EventDetailModal from "../components/EventDetailModal";
+
+// Ubicación por defecto (Av. Ejército 441) para ordenar por cercanía
+// cuando el navegador no entrega la geolocalización.
+const DEFAULT_LOCATION = { lat: -33.45249721842194, lng: -70.66111896424796 };
+
+function distanceKm(a, b) {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const lat1 = (a.lat * Math.PI) / 180;
+  const lat2 = (b.lat * Math.PI) / 180;
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
 
 function Events() {
   const user = JSON.parse(localStorage.getItem("user"));
@@ -14,6 +34,11 @@ function Events() {
   const [search, setSearch] = useState("");
 
   const [selectedFilter, setSelectedFilter] = useState("Todos");
+
+  // Ordenamiento: "none" | "cercanos" | "tendencias" | "recientes"
+  const [sortMode, setSortMode] = useState("none");
+
+  const [userLocation, setUserLocation] = useState(null);
 
   const [attendees, setAttendees] = useState({});
 
@@ -39,6 +64,44 @@ function Events() {
 
     return matchesSearch && matchesFilter;
   });
+
+  // Aplica el ordenamiento elegido con las etiquetas de abajo.
+  const visibleEvents = useMemo(() => {
+    const list = [...filteredEvents];
+    const origin = userLocation || DEFAULT_LOCATION;
+
+    if (sortMode === "cercanos") {
+      return list.sort((a, b) => {
+        const da =
+          a.latitude != null && a.longitude != null
+            ? distanceKm(origin, { lat: a.latitude, lng: a.longitude })
+            : Infinity;
+        const db =
+          b.latitude != null && b.longitude != null
+            ? distanceKm(origin, { lat: b.latitude, lng: b.longitude })
+            : Infinity;
+        return da - db;
+      });
+    }
+
+    if (sortMode === "tendencias") {
+      return list.sort((a, b) => {
+        const asis = (attendees[b.id] || 0) - (attendees[a.id] || 0);
+        if (asis !== 0) return asis;
+        const ra = ratings[a.id]?.average || 0;
+        const rb = ratings[b.id]?.average || 0;
+        return rb - ra;
+      });
+    }
+
+    if (sortMode === "recientes") {
+      return list.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at),
+      );
+    }
+
+    return list;
+  }, [filteredEvents, sortMode, userLocation, attendees, ratings]);
 
   async function fetchEvents() {
     try {
@@ -221,6 +284,27 @@ function Events() {
     fetchEvents();
   }, []);
 
+  // Ubicación del usuario (para ordenar por cercanía).
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setUserLocation(DEFAULT_LOCATION);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
+      () => setUserLocation(DEFAULT_LOCATION),
+    );
+  }, []);
+
+  // Alterna el orden: si tocas la etiqueta activa, se desactiva.
+  function toggleSort(mode) {
+    setSortMode((prev) => (prev === mode ? "none" : mode));
+  }
+
   return (
     <div className="events-container">
       <div className="events-header">
@@ -250,19 +334,34 @@ function Events() {
       </div>
 
       <div className="sort-container">
-        <button className="sort-button">📍 Cercanos</button>
+        <button
+          className={`sort-button ${sortMode === "cercanos" ? "active-sort" : ""}`}
+          onClick={() => toggleSort("cercanos")}
+        >
+          📍 Cercanos
+        </button>
 
-        <button className="sort-button">🔥 Tendencias</button>
+        <button
+          className={`sort-button ${sortMode === "tendencias" ? "active-sort" : ""}`}
+          onClick={() => toggleSort("tendencias")}
+        >
+          🔥 Tendencias
+        </button>
 
-        <button className="sort-button">🕒 Recientes</button>
+        <button
+          className={`sort-button ${sortMode === "recientes" ? "active-sort" : ""}`}
+          onClick={() => toggleSort("recientes")}
+        >
+          🕒 Recientes
+        </button>
       </div>
 
       <div className="events-list">
-        {filteredEvents.length === 0 ? (
+        {visibleEvents.length === 0 ? (
           <p className="events-empty">No se encontraron eventos.</p>
         ) : (
-          filteredEvents.map((event) => {
-            const ended = hasEnded(event);
+          visibleEvents.map((event) => {
+            const status = eventStatus(event);
             const rating = ratings[event.id];
 
             return (
@@ -275,7 +374,9 @@ function Events() {
                       : {}
                   }
                 >
-                  {ended && <span className="badge-ended">Finalizado</span>}
+                  <span className={`status-badge status-${status}`}>
+                    {statusLabel(event)}
+                  </span>
                 </div>
 
                 <div className="event-info">

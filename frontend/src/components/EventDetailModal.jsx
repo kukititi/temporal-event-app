@@ -43,6 +43,7 @@ function EventDetailModal({ event, user, onClose }) {
 
   const [attendees, setAttendees] = useState(0);
   const [stats, setStats] = useState(null);
+  const [isAttending, setIsAttending] = useState(false);
 
   const ended = hasEnded(event);
   const isCreator =
@@ -102,6 +103,23 @@ function EventDetailModal({ event, user, onClose }) {
     }
   }
 
+  // ¿El usuario actual marcó "Asistiré"? Solo así podrá calificar.
+  async function loadIsAttending() {
+    try {
+      if (!user) {
+        setIsAttending(false);
+        return;
+      }
+      const res = await fetch(
+        `${API_URL}/events/${event.id}/is-attending/${user.id}`,
+      );
+      const data = await res.json();
+      setIsAttending(!!data.attending);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     if (!event) return;
 
@@ -109,10 +127,12 @@ function EventDetailModal({ event, user, onClose }) {
     setMyRating(0);
     setMyComment("");
     setStats(null);
+    setIsAttending(false);
 
     loadReviews();
     loadRating();
     loadAttendees();
+    loadIsAttending();
 
     if (isCreator && ended) {
       loadStats();
@@ -260,8 +280,16 @@ function EventDetailModal({ event, user, onClose }) {
             </div>
           )}
 
-          {/* Calificar (requiere haber abierto el evento + estar logueado) */}
-          {user ? (
+          {/* Calificar: solo quienes marcaron "Asistiré" pueden hacerlo */}
+          {!user ? (
+            <p className="review-login-hint">
+              Inicia sesión para calificar y comentar este evento.
+            </p>
+          ) : !isAttending ? (
+            <p className="review-login-hint">
+              Solo quienes marcaron “Asistiré” pueden calificar este evento.
+            </p>
+          ) : (
             <div className="review-form">
               <h3 className="event-modal-subtitle">
                 {myRating ? "Tu calificación" : "Califica este evento"}
@@ -291,10 +319,6 @@ function EventDetailModal({ event, user, onClose }) {
                 )}
               </div>
             </div>
-          ) : (
-            <p className="review-login-hint">
-              Inicia sesión para calificar y comentar este evento.
-            </p>
           )}
 
           {/* Lista de reseñas */}

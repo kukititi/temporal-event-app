@@ -74,3 +74,26 @@ export function formatEventRange(event) {
   const endDay = end.toLocaleDateString("es-CL", dateOpts);
   return `${startDay} ${startTime} → ${endDay} ${endTime}`;
 }
+// Estado del evento según las fechas:
+//   "upcoming" (aún no empieza) | "ongoing" (en curso) | "ended" (terminó)
+export function eventStatus(event) {
+  const now = Date.now();
+
+  const start = event?.event_date ? new Date(event.event_date).getTime() : null;
+  const end = event?.end_date
+    ? new Date(event.end_date).getTime()
+    : start;
+
+  if (start == null || isNaN(start)) return "upcoming";
+  if (now < start) return "upcoming";
+  if (end != null && !isNaN(end) && now > end) return "ended";
+  return "ongoing";
+}
+
+// Texto en español del estado, listo para mostrar en un badge.
+export function statusLabel(event) {
+  const s = eventStatus(event);
+  if (s === "ongoing") return "En proceso";
+  if (s === "ended") return "Finalizado";
+  return "Próximamente";
+}

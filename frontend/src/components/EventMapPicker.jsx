@@ -18,8 +18,8 @@ const pinIcon = L.divIcon({
   iconAnchor: [13, 26],
 });
 
-// Centro por defecto: Santiago, Chile. Sirve también como sesgo de búsqueda.
-const DEFAULT_CENTER = { lat: -33.4489, lng: -70.6693 };
+// Centro por defecto: Av. Ejército Libertador 441, Santiago. También sesga la búsqueda.
+const DEFAULT_CENTER = { lat: -33.45249721842194, lng: -70.66111896424796 };
 
 // Recentra el mapa cuando cambian las coordenadas (búsqueda / geolocalización).
 function Recenter({ lat, lng }) {

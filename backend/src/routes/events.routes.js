@@ -552,6 +552,23 @@ router.post("/:id/reviews", async (req, res) => {
       });
     }
 
+    // Solo pueden calificar quienes marcaron asistencia al evento
+    const asistencia = await pool.query(
+      `
+      SELECT 1
+      FROM event_attendees
+      WHERE event_id = $1
+      AND user_id = $2
+      `,
+      [id, user_id],
+    );
+
+    if (asistencia.rows.length === 0) {
+      return res.status(403).json({
+        message: "Solo quienes asistieron pueden calificar este evento",
+      });
+    }
+
     const result = await pool.query(
       `
       INSERT INTO reviews (event_id, user_id, rating, comment)

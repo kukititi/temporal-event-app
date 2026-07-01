@@ -8,7 +8,7 @@ import {
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
-import { formatEventRange, hasEnded } from "../config/dateUtils";
+import { formatEventRange, hasEnded, eventStatus, statusLabel } from "../config/dateUtils";
 
 // Pines propios (divIcon) para no depender de las imágenes de Leaflet.
 const eventIcon = L.divIcon({
@@ -42,7 +42,7 @@ function Recenter({ center, signal }) {
 
   useEffect(() => {
     if (center) {
-      map.setView(center, map.getZoom(), { animate: true });
+      map.setView(center, signal > 0 ? 15 : map.getZoom(), { animate: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signal, center && center[0], center && center[1]]);
@@ -116,6 +116,10 @@ function EventMap({
               {event.category && (
                 <span className="mm-cat">{event.category}</span>
               )}
+
+              <span className={`status-chip ${eventStatus(event)}`}>
+                {statusLabel(event)}
+              </span>
 
               <small>🗓️ {formatEventRange(event)}</small>
 
