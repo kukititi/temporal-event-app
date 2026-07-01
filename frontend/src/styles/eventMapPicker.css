@@ -1,0 +1,134 @@
+.map-picker {
+  margin: 6px 0 4px;
+}
+
+.map-picker-search {
+  position: relative;
+
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  margin-bottom: 10px;
+}
+
+.map-picker-search input {
+  flex: 1;
+  min-width: 200px;
+
+  padding: 12px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface-2);
+  color: var(--text);
+
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.map-picker-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.map-picker-search > button {
+  padding: 12px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface-2);
+  color: var(--accent-text);
+
+  font-weight: bold;
+  cursor: pointer;
+
+  white-space: nowrap;
+}
+
+.map-picker-search > button:hover {
+  border-color: var(--accent);
+}
+
+.map-picker-loading {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Lista de resultados del autocompletado */
+.map-picker-results {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 500;
+
+  margin: 0;
+  padding: 6px;
+
+  list-style: none;
+
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  box-shadow: var(--shadow);
+
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.map-picker-results li {
+  padding: 10px 12px;
+
+  border-radius: 8px;
+
+  color: var(--text);
+  font-size: 0.9rem;
+
+  cursor: pointer;
+}
+
+.map-picker-results li:hover {
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+/* Contenedor del mini-mapa: Leaflet necesita altura explícita */
+.map-picker-map {
+  border-radius: 16px;
+  overflow: hidden;
+
+  border: 1px solid var(--border);
+}
+
+.map-picker-map .leaflet-container {
+  width: 100%;
+  height: 300px;
+}
+
+/* Pin arrastrable del selector */
+.tea-pick-pin-dot {
+  width: 22px;
+  height: 22px;
+
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+
+  background: var(--accent);
+  border: 2px solid #ffffff;
+
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
+}
+
+.map-picker-hint {
+  margin: 8px 2px 0;
+
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}

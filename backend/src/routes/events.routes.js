@@ -130,6 +130,8 @@ router.post("/", async (req, res) => {
       event_date,
       end_date,
       image_url,
+      latitude,
+      longitude,
       created_by,
     } = req.body;
 
@@ -144,9 +146,11 @@ router.post("/", async (req, res) => {
         event_date,
         end_date,
         image_url,
+        latitude,
+        longitude,
         created_by
       )
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
       RETURNING *
       `,
       [
@@ -158,6 +162,8 @@ router.post("/", async (req, res) => {
         event_date,
         end_date,
         image_url,
+        latitude,
+        longitude,
         created_by,
       ],
     );
@@ -201,11 +207,11 @@ router.delete("/:id", async (req, res) => {
     const { id } = req.params;
 
     // Borramos primero las dependencias para no violar llaves foráneas.
-    // (event_reviews igual tiene ON DELETE CASCADE, pero lo dejamos
+    // (reviews igual tiene ON DELETE CASCADE, pero lo dejamos
     //  explícito por si la tabla se creó sin el cascade.)
     await pool.query(
       `
-      DELETE FROM event_reviews
+      DELETE FROM reviews
       WHERE event_id = $1
       `,
       [id],
@@ -252,6 +258,8 @@ router.put("/:id", async (req, res) => {
       event_date,
       end_date,
       image_url,
+      latitude,
+      longitude,
     } = req.body;
 
     const result = await pool.query(
@@ -265,8 +273,10 @@ router.put("/:id", async (req, res) => {
         address = $5,
         event_date = $6,
         end_date = $7,
-        image_url = $8
-      WHERE id = $9
+        image_url = $8,
+        latitude = $9,
+        longitude = $10
+      WHERE id = $11
       RETURNING *
       `,
       [
@@ -278,6 +288,8 @@ router.put("/:id", async (req, res) => {
         event_date,
         end_date,
         image_url,
+        latitude,
+        longitude,
         id,
       ],
     );
@@ -457,7 +469,7 @@ router.get("/:id/is-favorite/:userId", async (req, res) => {
 
 // ============================================================
 //  RESEÑAS DE EVENTOS  (calificar + comentar)  — Ronda 2
-//  Requiere la tabla event_reviews (ver backend/event_reviews.sql)
+//  Requiere la tabla reviews (ver backend/reviews.sql)
 // ============================================================
 
 // Listar las reseñas de un evento (con datos del autor)
@@ -475,7 +487,7 @@ router.get("/:id/reviews", async (req, res) => {
         r.user_id,
         u.username,
         u.avatar_url
-      FROM event_reviews r
+      FROM reviews r
       JOIN users u ON u.id = r.user_id
       WHERE r.event_id = $1
       ORDER BY r.created_at DESC
@@ -503,7 +515,7 @@ router.get("/:id/rating", async (req, res) => {
       SELECT
         COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average,
         COUNT(*) AS count
-      FROM event_reviews
+      FROM reviews
       WHERE event_id = $1
       `,
       [id],
@@ -542,7 +554,7 @@ router.post("/:id/reviews", async (req, res) => {
 
     const result = await pool.query(
       `
-      INSERT INTO event_reviews (event_id, user_id, rating, comment)
+      INSERT INTO reviews (event_id, user_id, rating, comment)
       VALUES ($1, $2, $3, $4)
       ON CONFLICT (event_id, user_id)
       DO UPDATE SET
@@ -571,7 +583,7 @@ router.delete("/:id/reviews/:userId", async (req, res) => {
 
     await pool.query(
       `
-      DELETE FROM event_reviews
+      DELETE FROM reviews
       WHERE event_id = $1
       AND user_id = $2
       `,
@@ -610,7 +622,7 @@ router.get("/:id/event-stats", async (req, res) => {
       SELECT
         COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS average,
         COUNT(*) AS total_reviews
-      FROM event_reviews
+      FROM reviews
       WHERE event_id = $1
       `,
       [id],

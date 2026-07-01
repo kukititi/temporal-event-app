@@ -1,21 +1,40 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
+import EventMap from "../components/EventMap";
+import EventDetailModal from "../components/EventDetailModal";
 import "../styles/mapHome.css";
 import API_URL from "../config/api";
+import { formatEventRange } from "../config/dateUtils";
+
+const SANTIAGO = { lat: -33.4489, lng: -70.6693 };
+
+// Distancia en km entre dos puntos (fórmula de Haversine).
+function distanceKm(a, b) {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const lat1 = (a.lat * Math.PI) / 180;
+  const lat2 = (b.lat * Math.PI) / 180;
+
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.sin(dLng / 2) ** 2 * Math.cos(lat1) * Math.cos(lat2);
+
+  return R * 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+}
 
 function MapHome() {
+  const user = JSON.parse(localStorage.getItem("user"));
+
   const [events, setEvents] = useState([]);
-
   const [search, setSearch] = useState("");
-
+  const [userLocation, setUserLocation] = useState(null);
+  const [radiusKm, setRadiusKm] = useState(5);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   async function fetchEvents() {
     try {
       const response = await fetch(`${API_URL}/events`);
-
       const data = await response.json();
-
       setEvents(data);
     } catch (error) {
       console.log(error);
@@ -26,12 +45,52 @@ function MapHome() {
     fetchEvents();
   }, []);
 
-  const filteredEvents = events.filter(
-    (event) =>
-      event.title.toLowerCase().includes(search.toLowerCase()) ||
-      event.category.toLowerCase().includes(search.toLowerCase()) ||
-      event.location.toLowerCase().includes(search.toLowerCase()),
-  );
+  // Pedimos la ubicación del usuario; si la rechaza, caemos a Santiago.
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setUserLocation(SANTIAGO);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) =>
+        setUserLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
+      () => setUserLocation(SANTIAGO),
+    );
+  }, []);
+
+  // Filtro de texto (título, categoría, ubicación).
+  const searched = useMemo(() => {
+    const q = search.toLowerCase();
+    return events.filter(
+      (event) =>
+        event.title.toLowerCase().includes(q) ||
+        (event.category || "").toLowerCase().includes(q) ||
+        (event.location || "").toLowerCase().includes(q),
+    );
+  }, [events, search]);
+
+  // Eventos cercanos: con coordenadas, dentro del radio, ordenados por distancia.
+  const nearby = useMemo(() => {
+    if (!userLocation) return [];
+    return searched
+      .filter((e) => e.latitude != null && e.longitude != null)
+      .map((e) => ({
+        ...e,
+        _dist: distanceKm(userLocation, {
+          lat: e.latitude,
+          lng: e.longitude,
+        }),
+      }))
+      .filter((e) => e._dist <= radiusKm)
+      .sort((a, b) => a._dist - b._dist);
+  }, [searched, userLocation, radiusKm]);
+
+  const withoutCoords = searched.filter(
+    (e) => e.latitude == null || e.longitude == null,
+  ).length;
 
   return (
     <div className="map-home-container">
@@ -45,52 +104,77 @@ function MapHome() {
         />
       </div>
 
-      <div className="map-area">
-        <div className="fake-road horizontal-road"></div>
-
-        <div className="fake-road vertical-road"></div>
-
-        <div className="user-marker"></div>
-
-        {selectedEvent && (
-          <div className="map-popup">
-            <h3>{selectedEvent.title}</h3>
-
-            <p>{selectedEvent.category}</p>
-
-            <span>📍 {selectedEvent.location}</span>
-
-            <small>{selectedEvent.distance}</small>
-
-            <button onClick={() => setSelectedEvent(null)}>Cerrar</button>
-          </div>
-        )}
-
-        {filteredEvents.map((event) => (
-          <div
-            key={event.id}
-            className="event-marker"
-            style={{
-              left: event.x_position,
-              top: event.y_position,
-            }}
-            title={event.title}
-            onClick={() => setSelectedEvent(event)}
-          ></div>
+      <div className="map-controls">
+        <span className="map-controls-label">Radio de búsqueda:</span>
+        {[1, 5, 10, 25].map((km) => (
+          <button
+            key={km}
+            className={`radius-button ${radiusKm === km ? "active" : ""}`}
+            onClick={() => setRadiusKm(km)}
+          >
+            {km} km
+          </button>
         ))}
+      </div>
+
+      <div className="map-area">
+        <EventMap
+          events={searched}
+          userLocation={userLocation}
+          radiusKm={radiusKm}
+          onSelectEvent={(event) => setSelectedEvent(event)}
+        />
       </div>
 
       <div className="nearby-events">
-        <h2>Eventos Cercanos</h2>
+        <h2>Eventos Cercanos ({nearby.length})</h2>
 
-        {filteredEvents.map((event) => (
-          <div key={event.id} className="nearby-card">
-            <h3>{event.title}</h3>
+        {!userLocation ? (
+          <p className="nearby-empty">Obteniendo tu ubicación…</p>
+        ) : nearby.length === 0 ? (
+          <p className="nearby-empty">
+            No hay eventos dentro de {radiusKm} km. Prueba ampliar el radio.
+          </p>
+        ) : (
+          nearby.map((event) => (
+            <div key={event.id} className="nearby-card">
+              <div className="nearby-card-head">
+                <h3>{event.title}</h3>
+                <span className="nearby-distance">
+                  {event._dist.toFixed(1)} km
+                </span>
+              </div>
 
-            <p>📍 {event.distance}</p>
-          </div>
-        ))}
+              <p className="nearby-meta">🗓️ {formatEventRange(event)}</p>
+
+              {event.location && (
+                <p className="nearby-location">📍 {event.location}</p>
+              )}
+
+              <button
+                className="nearby-details-btn"
+                onClick={() => setSelectedEvent(event)}
+              >
+                🔍 Ver y calificar
+              </button>
+            </div>
+          ))
+        )}
+
+        {withoutCoords > 0 && (
+          <p className="nearby-note">
+            {withoutCoords} evento(s) todavía no tienen ubicación en el mapa.
+            Edítalos y marca su punto para que aparezcan aquí.
+          </p>
+        )}
       </div>
+
+      {/* Modal de detalle: ver descripción, calificar y comentar */}
+      <EventDetailModal
+        event={selectedEvent}
+        user={user}
+        onClose={() => setSelectedEvent(null)}
+      />
     </div>
   );
 }

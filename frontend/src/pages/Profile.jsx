@@ -4,6 +4,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import "../styles/profile.css";
 import API_URL from "../config/api";
 import EventDetailModal from "../components/EventDetailModal";
+import EventMapPicker from "../components/EventMapPicker";
 import {
   combineDateTime,
   toTimeString,
@@ -49,6 +50,10 @@ function Profile() {
   const [eventEndDate, setEventEndDate] = useState(null);
   const [eventEndTime, setEventEndTime] = useState("");
   const [eventImage, setEventImage] = useState("");
+
+  // Coordenadas del punto elegido en el mapa (selector)
+  const [eventLat, setEventLat] = useState(null);
+  const [eventLng, setEventLng] = useState(null);
 
   const [editingEventId, setEditingEventId] = useState(null);
 
@@ -152,6 +157,8 @@ function Profile() {
     setEventEndDate(null);
     setEventEndTime("");
     setEventImage("");
+    setEventLat(null);
+    setEventLng(null);
   }
 
   // Sube la imagen de portada como archivo (la reduce y guarda en base64)
@@ -193,6 +200,10 @@ function Profile() {
       alert("La fecha/hora de fin debe ser posterior a la de inicio.");
       return;
     }
+    if (eventLat == null || eventLng == null) {
+      alert("Marca la ubicación del evento en el mapa.");
+      return;
+    }
 
     try {
       const response = await fetch(`${API_URL}/events`, {
@@ -209,6 +220,8 @@ function Profile() {
           event_date: start.toISOString(),
           end_date: end.toISOString(),
           image_url: eventImage,
+          latitude: eventLat,
+          longitude: eventLng,
           created_by: user.id,
         }),
       });
@@ -258,6 +271,8 @@ function Profile() {
           event_date: start.toISOString(),
           end_date: end.toISOString(),
           image_url: eventImage,
+          latitude: eventLat,
+          longitude: eventLng,
         }),
       });
 
@@ -316,6 +331,9 @@ function Profile() {
     setEventEndTime(toTimeString(event.end_date));
 
     setEventImage(event.image_url || "");
+
+    setEventLat(event.latitude ?? null);
+    setEventLng(event.longitude ?? null);
 
     setShowCreateEvent(true);
   }
@@ -760,6 +778,19 @@ function Profile() {
                 placeholder="Dirección"
                 value={eventAddress}
                 onChange={(e) => setEventAddress(e.target.value)}
+              />
+
+              <label className="event-field-label">
+                Ubicación en el mapa
+              </label>
+              <EventMapPicker
+                latitude={eventLat}
+                longitude={eventLng}
+                address={eventAddress}
+                onChange={(lat, lng) => {
+                  setEventLat(lat);
+                  setEventLng(lng);
+                }}
               />
 
               <label className="event-image-upload">
