@@ -30,6 +30,7 @@ function MapHome() {
   const [userLocation, setUserLocation] = useState(null);
   const [radiusKm, setRadiusKm] = useState(5);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [recenterSignal, setRecenterSignal] = useState(0);
 
   async function fetchEvents() {
     try {
@@ -45,20 +46,27 @@ function MapHome() {
     fetchEvents();
   }, []);
 
-  // Pedimos la ubicación del usuario; si la rechaza, caemos a Santiago.
-  useEffect(() => {
+  // Pide la ubicación del usuario; si la rechaza, cae a Santiago.
+  function locateUser(recenter = false) {
     if (!navigator.geolocation) {
       setUserLocation(SANTIAGO);
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) =>
+      (pos) => {
         setUserLocation({
           lat: pos.coords.latitude,
           lng: pos.coords.longitude,
-        }),
-      () => setUserLocation(SANTIAGO),
+        });
+        if (recenter) setRecenterSignal((s) => s + 1);
+      },
+      () => setUserLocation((prev) => prev || SANTIAGO),
+      { enableHighAccuracy: true, timeout: 8000 },
     );
+  }
+
+  useEffect(() => {
+    locateUser(false);
   }, []);
 
   // Filtro de texto (título, categoría, ubicación).
@@ -72,7 +80,7 @@ function MapHome() {
     );
   }, [events, search]);
 
-  // Eventos cercanos: con coordenadas, dentro del radio, ordenados por distancia.
+  // Cercanos: con coordenadas, dentro del radio, ordenados por distancia.
   const nearby = useMemo(() => {
     if (!userLocation) return [];
     return searched
@@ -118,10 +126,19 @@ function MapHome() {
       </div>
 
       <div className="map-area">
+        <button
+          className="locate-me-button"
+          onClick={() => locateUser(true)}
+          title="Centrar en mi ubicación"
+        >
+          📍 Centrar en mí
+        </button>
+
         <EventMap
           events={searched}
           userLocation={userLocation}
           radiusKm={radiusKm}
+          recenterSignal={recenterSignal}
           onSelectEvent={(event) => setSelectedEvent(event)}
         />
       </div>
@@ -138,25 +155,36 @@ function MapHome() {
         ) : (
           nearby.map((event) => (
             <div key={event.id} className="nearby-card">
-              <div className="nearby-card-head">
-                <h3>{event.title}</h3>
-                <span className="nearby-distance">
-                  {event._dist.toFixed(1)} km
-                </span>
+              <div
+                className="nearby-thumb"
+                style={
+                  event.image_url
+                    ? { backgroundImage: `url(${event.image_url})` }
+                    : {}
+                }
+              />
+
+              <div className="nearby-body">
+                <div className="nearby-card-head">
+                  <h3>{event.title}</h3>
+                  <span className="nearby-distance">
+                    {event._dist.toFixed(1)} km
+                  </span>
+                </div>
+
+                <p className="nearby-meta">🗓️ {formatEventRange(event)}</p>
+
+                {event.location && (
+                  <p className="nearby-location">📍 {event.location}</p>
+                )}
+
+                <button
+                  className="nearby-details-btn"
+                  onClick={() => setSelectedEvent(event)}
+                >
+                  🔍 Ver y calificar
+                </button>
               </div>
-
-              <p className="nearby-meta">🗓️ {formatEventRange(event)}</p>
-
-              {event.location && (
-                <p className="nearby-location">📍 {event.location}</p>
-              )}
-
-              <button
-                className="nearby-details-btn"
-                onClick={() => setSelectedEvent(event)}
-              >
-                🔍 Ver y calificar
-              </button>
             </div>
           ))
         )}

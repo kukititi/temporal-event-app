@@ -18,7 +18,7 @@ const pinIcon = L.divIcon({
   iconAnchor: [13, 26],
 });
 
-// Centro por defecto: Santiago, Chile.
+// Centro por defecto: Santiago, Chile. Sirve también como sesgo de búsqueda.
 const DEFAULT_CENTER = { lat: -33.4489, lng: -70.6693 };
 
 // Recentra el mapa cuando cambian las coordenadas (búsqueda / geolocalización).
@@ -45,7 +45,13 @@ function ClickToPlace({ onPick }) {
   return null;
 }
 
-function EventMapPicker({ latitude, longitude, address, onChange }) {
+function EventMapPicker({
+  latitude,
+  longitude,
+  address,
+  onChange,
+  onResolveAddress,
+}) {
   const hasCoords = latitude != null && longitude != null;
   const center = hasCoords
     ? { lat: latitude, lng: longitude }
@@ -54,11 +60,16 @@ function EventMapPicker({ latitude, longitude, address, onChange }) {
   const [query, setQuery] = useState(address || "");
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [noResults, setNoResults] = useState(false);
   const timer = useRef(null);
 
   // Autocompletado de direcciones con Photon (no requiere API key).
+  // OJO: la instancia pública NO soporta lang=es (solo default/en/de/fr).
+  // Sin el parámetro lang, Photon usa el idioma del navegador y devuelve
+  // los nombres locales, que es justo lo que queremos en Chile.
   function handleSearch(value) {
     setQuery(value);
+    setNoResults(false);
     clearTimeout(timer.current);
 
     if (value.trim().length < 3) {
@@ -72,12 +83,15 @@ function EventMapPicker({ latitude, longitude, address, onChange }) {
         const res = await fetch(
           `https://photon.komoot.io/api/?q=${encodeURIComponent(
             value,
-          )}&lang=es&limit=5`,
+          )}&limit=5&lat=${DEFAULT_CENTER.lat}&lon=${DEFAULT_CENTER.lng}`,
         );
         const data = await res.json();
-        setResults(data.features || []);
+        const features = data.features || [];
+        setResults(features);
+        setNoResults(features.length === 0);
       } catch (error) {
         console.log(error);
+        setNoResults(true);
       } finally {
         setSearching(false);
       }
@@ -91,11 +105,47 @@ function EventMapPicker({ latitude, longitude, address, onChange }) {
       .join(", ");
   }
 
+  // Traducir un punto (lat/lng) a una dirección legible (reverse geocoding).
+  async function reverseGeocode(lat, lng) {
+    try {
+      const res = await fetch(
+        `https://photon.komoot.io/reverse?lon=${lng}&lat=${lat}`,
+      );
+      const data = await res.json();
+      const feature = (data.features || [])[0];
+      if (!feature) return;
+
+      const p = feature.properties || {};
+      const street = [p.street, p.housenumber].filter(Boolean).join(" ");
+      const line = street || p.name || "";
+      const full = [line, p.city].filter(Boolean).join(", ") || line;
+      const city = p.city || p.county || p.state || "";
+
+      if (full) setQuery(full);
+      if (onResolveAddress) onResolveAddress(full, city);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // Punto elegido por clic o arrastre: guardamos y resolvemos la dirección.
+  function pickPoint(lat, lng) {
+    onChange(lat, lng);
+    reverseGeocode(lat, lng);
+  }
+
+  // Resultado elegido en la lista: ya trae etiqueta y ciudad.
   function selectResult(feature) {
     const [lng, lat] = feature.geometry.coordinates;
+    const p = feature.properties || {};
     onChange(lat, lng);
-    setQuery(labelOf(feature) || query);
+    const label = labelOf(feature);
+    setQuery(label || query);
     setResults([]);
+    setNoResults(false);
+    if (onResolveAddress) {
+      onResolveAddress(label, p.city || p.state || "");
+    }
   }
 
   function useMyLocation() {
@@ -104,7 +154,7 @@ function EventMapPicker({ latitude, longitude, address, onChange }) {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => onChange(pos.coords.latitude, pos.coords.longitude),
+      (pos) => pickPoint(pos.coords.latitude, pos.coords.longitude),
       () => alert("No pudimos obtener tu ubicación."),
     );
   }
@@ -134,6 +184,13 @@ function EventMapPicker({ latitude, longitude, address, onChange }) {
             ))}
           </ul>
         )}
+
+        {noResults && !searching && (
+          <div className="map-picker-noresults">
+            Sin resultados. Prueba con otra dirección o marca el punto en el
+            mapa.
+          </div>
+        )}
       </div>
 
       <div className="map-picker-map">
@@ -152,7 +209,7 @@ function EventMapPicker({ latitude, longitude, address, onChange }) {
             lng={hasCoords ? longitude : null}
           />
 
-          <ClickToPlace onPick={onChange} />
+          <ClickToPlace onPick={pickPoint} />
 
           {hasCoords && (
             <Marker
@@ -162,7 +219,7 @@ function EventMapPicker({ latitude, longitude, address, onChange }) {
               eventHandlers={{
                 dragend: (e) => {
                   const m = e.target.getLatLng();
-                  onChange(m.lat, m.lng);
+                  pickPoint(m.lat, m.lng);
                 },
               }}
             />

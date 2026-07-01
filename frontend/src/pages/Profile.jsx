@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../styles/profile.css";
+import "../styles/eventFormModal.css";
 import API_URL from "../config/api";
 import EventDetailModal from "../components/EventDetailModal";
 import EventMapPicker from "../components/EventMapPicker";
@@ -745,7 +746,34 @@ function Profile() {
           <h2>Panel de Organizador</h2>
 
           {showCreateEvent && (
-            <div className="create-event-form">
+            <div
+              className="event-form-overlay"
+              onClick={() => {
+                resetEventForm();
+                setShowCreateEvent(false);
+              }}
+            >
+              <div
+                className="event-form-modal"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="event-form-header">
+                  <h3>
+                    {editingEventId ? "Editar evento" : "Crear evento"}
+                  </h3>
+                  <button
+                    type="button"
+                    className="event-form-close"
+                    onClick={() => {
+                      resetEventForm();
+                      setShowCreateEvent(false);
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="create-event-form">
               <input
                 type="text"
                 placeholder="Título"
@@ -784,12 +812,17 @@ function Profile() {
                 Ubicación en el mapa
               </label>
               <EventMapPicker
+                key={editingEventId ?? "nuevo"}
                 latitude={eventLat}
                 longitude={eventLng}
                 address={eventAddress}
                 onChange={(lat, lng) => {
                   setEventLat(lat);
                   setEventLng(lng);
+                }}
+                onResolveAddress={(addr, city) => {
+                  if (addr) setEventAddress(addr);
+                  if (city && !eventLocation) setEventLocation(city);
                 }}
               />
 
@@ -884,16 +917,16 @@ function Profile() {
                   Cancelar
                 </button>
               </div>
+                </div>
+              </div>
             </div>
           )}
 
           <button
             className="create-event-button"
             onClick={() => {
-              const abriendo = !showCreateEvent;
-              setShowCreateEvent(abriendo);
-              // Al ABRIR para crear, limpiamos cualquier rastro de una edición previa
-              if (abriendo) resetEventForm();
+              resetEventForm();
+              setShowCreateEvent(true);
             }}
           >
             Crear Evento

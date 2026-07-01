@@ -27,15 +27,17 @@ const endedIcon = L.divIcon({
   popupAnchor: [0, -20],
 });
 
+// Halo grande de "aquí estás tú": se ve aunque haya un pin de evento encima.
 const userIcon = L.divIcon({
   className: "tea-user-pin",
-  html: '<div class="tea-user-pin-dot"></div>',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
+  html: '<div class="tea-user-pin-ring"></div><div class="tea-user-pin-dot"></div>',
+  iconSize: [44, 44],
+  iconAnchor: [22, 22],
 });
 
-// Recentra el mapa cuando cambia la ubicación del usuario.
-function Recenter({ center }) {
+// Recentra el mapa cuando cambia la ubicación del usuario o cuando se
+// pulsa "Centrar en mí" (signal cambia aunque las coordenadas sean iguales).
+function Recenter({ center, signal }) {
   const map = useMap();
 
   useEffect(() => {
@@ -43,12 +45,18 @@ function Recenter({ center }) {
       map.setView(center, map.getZoom(), { animate: true });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [center && center[0], center && center[1]]);
+  }, [signal, center && center[0], center && center[1]]);
 
   return null;
 }
 
-function EventMap({ events = [], userLocation, radiusKm = 5, onSelectEvent }) {
+function EventMap({
+  events = [],
+  userLocation,
+  radiusKm = 5,
+  recenterSignal = 0,
+  onSelectEvent,
+}) {
   const center = userLocation
     ? [userLocation.lat, userLocation.lng]
     : [-33.4489, -70.6693];
@@ -72,6 +80,7 @@ function EventMap({ events = [], userLocation, radiusKm = 5, onSelectEvent }) {
 
       <Recenter
         center={userLocation ? [userLocation.lat, userLocation.lng] : null}
+        signal={recenterSignal}
       />
 
       {userLocation && (
@@ -79,6 +88,8 @@ function EventMap({ events = [], userLocation, radiusKm = 5, onSelectEvent }) {
           <Marker
             position={[userLocation.lat, userLocation.lng]}
             icon={userIcon}
+            zIndexOffset={-500}
+            interactive={false}
           />
           <Circle
             center={[userLocation.lat, userLocation.lng]}

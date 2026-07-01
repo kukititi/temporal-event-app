@@ -4,6 +4,7 @@
 
 .map-picker-search {
   position: relative;
+  z-index: 1000;
 
   display: flex;
   gap: 8px;
@@ -66,7 +67,7 @@
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  z-index: 500;
+  z-index: 1000;
 
   margin: 0;
   padding: 6px;
@@ -99,8 +100,28 @@
   color: var(--accent-text);
 }
 
+.map-picker-noresults {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 1000;
+
+  padding: 12px 14px;
+
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
 /* Contenedor del mini-mapa: Leaflet necesita altura explícita */
 .map-picker-map {
+  position: relative;
+  z-index: 0;
+
   border-radius: 16px;
   overflow: hidden;
 
@@ -110,6 +131,12 @@
 .map-picker-map .leaflet-container {
   width: 100%;
   height: 300px;
+}
+
+/* Leaflet le pone un recuadro blanco a los divIcon: lo quitamos */
+.map-picker-map .leaflet-div-icon {
+  background: transparent;
+  border: none;
 }
 
 /* Pin arrastrable del selector */

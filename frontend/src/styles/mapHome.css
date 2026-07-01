@@ -93,6 +93,38 @@
   height: 520px;
 }
 
+/* Botón flotante para volver a centrar en el usuario */
+.locate-me-button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+
+  padding: 10px 14px;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  background: var(--surface);
+  color: var(--accent-text);
+
+  font-weight: bold;
+  cursor: pointer;
+
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.locate-me-button:hover {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* Leaflet le pone un recuadro blanco a los divIcon: lo quitamos */
+.leaflet-div-icon {
+  background: transparent;
+  border: none;
+}
+
 /* ---- Pines propios (divIcon) ---- */
 .tea-map-pin-dot {
   width: 20px;
@@ -112,16 +144,55 @@
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
 }
 
+/* Marcador de usuario: punto central + halo que pulsa (se ve aunque
+   haya un pin de evento justo encima) */
+.tea-user-pin {
+  position: relative;
+}
+
 .tea-user-pin-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
   width: 16px;
   height: 16px;
 
   border-radius: 50%;
 
-  background: #4fd1c5;
+  background: #2563eb;
   border: 3px solid #ffffff;
 
-  box-shadow: 0 0 0 6px rgba(79, 209, 197, 0.25);
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.8);
+}
+
+.tea-user-pin-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 44px;
+  height: 44px;
+
+  border-radius: 50%;
+
+  background: rgba(37, 99, 235, 0.18);
+  border: 2px solid rgba(37, 99, 235, 0.5);
+
+  animation: userPulse 2s infinite;
+}
+
+@keyframes userPulse {
+  0% {
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.4);
+    opacity: 0;
+  }
 }
 
 /* ---- Popup del marcador ---- */
@@ -203,11 +274,14 @@
 }
 
 .nearby-card {
+  display: flex;
+  gap: 16px;
+
   background: var(--surface);
 
   border-radius: 20px;
 
-  padding: 22px;
+  padding: 18px;
 
   margin-bottom: 18px;
 
@@ -223,6 +297,25 @@
 .nearby-card:hover {
   transform: translateY(-3px);
   border-color: var(--accent);
+}
+
+/* Miniatura del evento */
+.nearby-thumb {
+  width: 96px;
+  height: 96px;
+
+  flex-shrink: 0;
+
+  border-radius: 16px;
+
+  background: linear-gradient(135deg, #49c5cd, #133b5c);
+  background-size: cover;
+  background-position: center;
+}
+
+.nearby-body {
+  flex: 1;
+  min-width: 0;
 }
 
 .nearby-card-head {
@@ -292,5 +385,14 @@
 
   .tea-leaflet {
     height: 400px;
+  }
+
+  .nearby-card {
+    flex-direction: column;
+  }
+
+  .nearby-thumb {
+    width: 100%;
+    height: 150px;
   }
 }

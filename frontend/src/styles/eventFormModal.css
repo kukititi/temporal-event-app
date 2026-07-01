@@ -1,0 +1,92 @@
+/* ============================================================
+   Modal del formulario de crear / editar evento
+   ============================================================ */
+
+.event-form-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 40px 16px;
+
+  overflow-y: auto;
+}
+
+.event-form-modal {
+  position: relative;
+
+  width: 100%;
+  max-width: 620px;
+
+  background: var(--surface);
+  color: var(--text);
+
+  border: 1px solid var(--border);
+  border-radius: 20px;
+
+  box-shadow: var(--shadow);
+
+  overflow: hidden;
+}
+
+.event-form-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 18px 22px;
+
+  border-bottom: 1px solid var(--border);
+
+  background: var(--surface-2);
+}
+
+.event-form-header h3 {
+  margin: 0;
+  color: var(--heading);
+  font-size: 1.25rem;
+}
+
+.event-form-close {
+  width: 36px;
+  height: 36px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: var(--surface);
+  color: var(--text);
+
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.event-form-close:hover {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* El formulario en sí, dentro del modal */
+.event-form-modal .create-event-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 22px;
+
+  /* Anulamos la "tarjeta" que trae .create-event-form en profile.css,
+     porque aquí ya vive dentro del modal */
+  background: transparent;
+  border: none;
+  border-radius: 0;
+
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
